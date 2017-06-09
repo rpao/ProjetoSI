@@ -1,0 +1,68 @@
+package RobocodeSI;
+
+import RobocodeSI.*;
+import robocode.*;
+import robocode.ScannedRobotEvent;
+
+query "consulta_acoes"
+	acao: Acao()
+end
+
+rule 'girar radar'
+when
+	not (exists ScannedRobotEvent())
+then
+	insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 1));
+	System.out.println("girar radar");
+end
+
+rule "mover-se aleatoriamente"
+when
+  EstadoRobot( distanceRemaining == 0 )
+  $batalla: EstadoBatalla()
+then
+  insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 1));
+  insert(new Acao(Acao.GIRAR_TANQUE_DIR, (360*Math.random() - 180), 1));
+  insert(new Acao(Acao.GIRAR_CANO_DIR, (360*Math.random() - 180), 1));
+  double avance = Math.min($batalha.getLarguraCampo(), $batalha.getAlturaCampo())*Math.random();
+  insert(new Acao(Acao.AVANCAR, avance, 1));
+  System.out.println("Mover aleatoriamente");
+end
+
+/*
+rule 'verificar aliados > não atirar'
+when
+	(exists onScannedRobot())
+	$aliadoDetectado: ScannedRobotEvent()
+	contains (“TeeHee”: aliadoDetectado)
+then
+	(isFromTeam())
+end
+
+rule 'robo detectado > atirar'
+when
+	(exists onScannedRobot())
+	(not isFromTeam())
+then
+	$battleFieldHeight: getBattleFieldHeight(),
+	$battleFieldWidth: getBattleFieldWidth();
+	$aiming: true
+	$bulletPower: 3
+	$myX: getX()
+	$myY: getY()
+	$absoluteBearing: getHeadingRadians() + getBearingRadians()
+	$enemyX: getX() + getDistance() * sin(absoluteBearing)
+	$enemyY: getY() + getDistance() *cos(absoluteBearing)
+	$enemyHeading: getHeadingRadians()
+	$enemyHeadingChange: enemyHeading oldEnemyHeading
+	$enemyVelocity: getVelocity()
+	$oldEnemyHeading: enemyHeading
+	$deltaTime: 0
+	$predictedX: enemyX
+	$predictedY: enemyY
+	$theta: normalAbsoluteAngle(atan2(predictedX getX(), predictedY getY()))
+	setTurnRadarRightRadians(normalRelativeAngle(absoluteBearing getRadarHeadingRadians()))
+	setTurnGunRightRadians(normalRelativeAngle(theta getGunHeadingRadians()))
+	fire(min(500 / getDistance(), 3))
+end
+*/
