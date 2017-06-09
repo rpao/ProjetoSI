@@ -1,4 +1,4 @@
-package RobocodeSI;
+package ProjetoSI;
 
 import java.util.List;
 import java.util.Vector;
@@ -15,7 +15,7 @@ import org.drools.runtime.rule.QueryResultsRow;
 import robocode.*;
 
 public class VerificarRegras {
-	public static String REGRAS = "ProjetoRobocode/regras/TeeHee_Smart.drl";
+	public static String REGRAS = "ProjetoSI/regras/TeeHee_Smart.drl";
 	public static String CONSULTA_ACOES = "consulta_acoes";
 	
 	private KnowledgeBuilder kbuilder;

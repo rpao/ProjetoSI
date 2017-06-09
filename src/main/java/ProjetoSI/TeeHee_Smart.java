@@ -1,4 +1,4 @@
-package RobocodeSI;
+package ProjetoSI;
 
 import java.awt.Color;
 import java.util.Vector;
@@ -25,7 +25,7 @@ import robocode.StatusEvent;
 
 public class TeeHee_Smart extends AdvancedRobot {
 
-	public static String REGRAS = "ProjetoRobocode/regras/TeeHee_Smart.drl";
+	public static String REGRAS = "ProjetoSI/regras/TeeHee_Smart.drl";
 	public static String CONSULTA_ACOES = "consulta_acoes";
 
 	private KnowledgeBuilder kbuilder;

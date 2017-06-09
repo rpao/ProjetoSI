@@ -1,4 +1,4 @@
-package RobocodeSI;
+package ProjetoSI;
 
 import robocode.AdvancedRobot;
 
