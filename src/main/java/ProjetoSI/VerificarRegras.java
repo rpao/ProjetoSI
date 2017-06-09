@@ -15,7 +15,7 @@ import org.drools.runtime.rule.QueryResultsRow;
 import robocode.*;
 
 public class VerificarRegras {
-	public static String REGRAS = "ProjetoSI/regras/TeeHee_Smart.drl";
+	public static String REGRAS;
 	public static String CONSULTA_ACOES = "consulta_acoes";
 	
 	private KnowledgeBuilder kbuilder;
@@ -23,7 +23,9 @@ public class VerificarRegras {
 	private StatefulKnowledgeSession ksession;  // Memoria activa
 	private Vector<FactHandle> refFatosAtuais = new Vector<FactHandle>();
 
-	public VerificarRegras() {
+	public VerificarRegras(String regras) {
+		this.REGRAS = regras;
+		
 		String modoDebug = System.getProperty("robot.debug", "true");
 		DEBUG.habilitarModoDebug(modoDebug.equals("true"));
 		criarBC();
@@ -63,10 +65,6 @@ public class VerificarRegras {
 
 		DEBUG.mensagem("Criar secao em memoria ativa");
 		ksession = kbase.newStatefulKnowledgeSession();
-	}
-
-	public static void main(String args[]) {
-		VerificarRegras regrasTeeHee_Smart = new VerificarRegras();
 	}
 
 	private List<Acao> recuperarAcoes() {
