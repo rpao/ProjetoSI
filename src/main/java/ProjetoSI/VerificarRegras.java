@@ -70,8 +70,7 @@ public class VerificarRegras {
 	private List<Acao> recuperarAcoes() {
 		Acao acao;
 		Vector<Acao> listaAcoes = new Vector<Acao>();
-
-		for (QueryResultsRow resultado : ksession.getQueryResults(TeeHee_Smart.CONSULTA_ACOES)) {
+		for (QueryResultsRow resultado : ksession.getQueryResults(VerificarRegras.CONSULTA_ACOES)) {
 			acao = (Acao) resultado.get("Acao");
 			acao.setRobot(null);
 			listaAcoes.add(acao);
