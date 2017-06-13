@@ -62,7 +62,7 @@ public class Acao {
 		if (this.robot != null) {
 			switch (this.tipo) {
 			case Acao.DISPARAR: robot.setFire(parametro); break;
-			case Acao.AVANCAR: robot.setAhead(parametro); break;
+			case Acao.AVANCAR: robot.ahead(parametro);break;//robot.setAhead(parametro); break;
 			case Acao.RETROCEDER: robot.setBack(parametro); break;
 			case Acao.STOP: robot.setStop(); break;
 			case Acao.GIRAR_CANO_DIR: robot.setTurnGunRight(parametro); break;

@@ -1,6 +1,16 @@
 package ProjetoSI;
 
-import java.awt.Color;
+import robocode.AdvancedRobot;
+import robocode.BulletHitBulletEvent;
+import robocode.BulletHitEvent;
+import robocode.BulletMissedEvent;
+import robocode.HitByBulletEvent;
+import robocode.HitRobotEvent;
+import robocode.HitWallEvent;
+import robocode.RobotDeathEvent;
+import robocode.ScannedRobotEvent;
+
+import java.awt.*;
 import java.util.Vector;
 
 import org.drools.KnowledgeBase;
@@ -13,19 +23,8 @@ import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.FactHandle;
 import org.drools.runtime.rule.QueryResultsRow;
 
-import robocode.AdvancedRobot;
-import robocode.BulletHitBulletEvent;
-import robocode.BulletHitEvent;
-import robocode.BulletMissedEvent;
-import robocode.HitByBulletEvent;
-import robocode.HitRobotEvent;
-import robocode.HitWallEvent;
-import robocode.RobotDeathEvent;
-import robocode.ScannedRobotEvent;
-
-public class CrazyShooter extends AdvancedRobot {
-
-	public static String REGRAS = "ProjetoSI/regras/CrazyShooter.drl";
+public class LazySpin extends AdvancedRobot {
+	public static String REGRAS = "ProjetoSI/regras/LazySpin.drl";
 	public static String CONSULTA_ACOES = "consulta_acoes";
 
 	private KnowledgeBuilder kbuilder;
@@ -33,13 +32,13 @@ public class CrazyShooter extends AdvancedRobot {
 	private StatefulKnowledgeSession ksession;
 	private Vector<FactHandle> refFatosAtuais = new Vector<FactHandle>();
 
+	public LazySpin(){
 
-	public CrazyShooter(){
 	}
 
 	@Override
 	public void run() {
-		//setColors(Color.RED, Color.BLACK, Color.RED);
+		// Set colors
 		setBodyColor(Color.WHITE);
 		setGunColor(Color.YELLOW);
 		setRadarColor(Color.ORANGE);
@@ -56,6 +55,15 @@ public class CrazyShooter extends AdvancedRobot {
 		setAdjustRadarForRobotTurn(true);
 
 		while (true) {
+
+			// Tell the game that when we take move,
+			// we'll also want to turn right... a lot.
+			setTurnRight(10000);
+			// Limit our speed to 5
+			setMaxVelocity(5);
+			// Start moving (and turning)
+			ahead(10000);
+						
 			DEBUG.mensagem("inicio turno");
 			carregarEstadoRobot();
 			carregarEstadoBatalha();
@@ -79,13 +87,13 @@ public class CrazyShooter extends AdvancedRobot {
 	}
 
 	private void criarBC() {
-		String ficheroRegras = System.getProperty("robot.regras", CrazyShooter.REGRAS);
+		String ficheroRegras = System.getProperty("robot.regras", LazySpin.REGRAS);
 
 		DEBUG.mensagem("criar BC");
 		kbuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
 
 		DEBUG.mensagem("Carregar regras a partir de: "+ficheroRegras);
-		kbuilder.add(ResourceFactory.newClassPathResource(ficheroRegras, CrazyShooter.class), ResourceType.DRL);
+		kbuilder.add(ResourceFactory.newClassPathResource(ficheroRegras, LazySpin.class), ResourceType.DRL);
 		if (kbuilder.hasErrors()) {
 			System.err.println(kbuilder.getErrors().toString());
 		}
@@ -122,7 +130,7 @@ public class CrazyShooter extends AdvancedRobot {
 		Acao Acao;
 		Vector<Acao> listaAcaoes = new Vector<Acao>();
 
-		for (QueryResultsRow resultado : ksession.getQueryResults(CrazyShooter.CONSULTA_ACOES)) {
+		for (QueryResultsRow resultado : ksession.getQueryResults(LazySpin.CONSULTA_ACOES)) {
 			Acao = (Acao) resultado.get("acao");
 			Acao.setRobot(this);
 			listaAcaoes.add(Acao);
@@ -137,7 +145,7 @@ public class CrazyShooter extends AdvancedRobot {
 			Acao.iniciarExecucao();
 		}
 	}
- 
+
 	@Override
 	public void onBulletHit(BulletHitEvent event) {
 		refFatosAtuais.add(ksession.insert(event));
