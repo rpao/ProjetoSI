@@ -41,7 +41,7 @@ public class CrazyShooter extends AdvancedRobot {
 	public void run() {
 		//setColors(Color.RED, Color.BLACK, Color.RED);
 		setBodyColor(Color.WHITE);
-		setGunColor(Color.YELLOW);
+		setGunColor(Color.BLACK);
 		setRadarColor(Color.ORANGE);
 		setScanColor(Color.BLACK);
 

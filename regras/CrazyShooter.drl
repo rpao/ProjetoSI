@@ -36,7 +36,7 @@ rule "DISPARAR"
 		$alvoEscaneado: ScannedRobotEvent($nomeAlvo: name)
    then	
 		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
-		insert(new Acao(Acao.GIRAR_CANO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
 		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
 		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
 		System.out.println("> Mirar...");
@@ -55,7 +55,7 @@ rule "MOVER-SE ALEATORIAMENTE"
 		insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 1));
 		double anguloGiro = (360*Math.random() - 180);
 		insert(new Acao(Acao.GIRAR_TANQUE_DIR, anguloGiro, 1));
-		insert(new Acao(Acao.GIRAR_CANO_DIR, anguloGiro, 1));
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, anguloGiro, 1));
 		double avance = Math.min($batalha.getLarguraCampo(), $batalha.getAlturaCampo())*Math.random();
 		insert(new Acao(Acao.AVANCAR, avance, 1));	
 		System.out.println("> Mover aleatoriamente");
@@ -82,7 +82,7 @@ rule "CHOQUE COM ROBOT > MIRAR"
 	   	insert(new Acao(Acao.GIRAR_TANQUE_DIR, (- $anguloRelativo*1.50), 5));
 		insert(new Acao(Acao.AVANCAR, 100, 5));
 		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
-		insert(new Acao(Acao.GIRAR_CANO_DIR, ($anguloRelativo - anguloRelativoCano), 5));
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($anguloRelativo - anguloRelativoCano), 5));
 		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
 		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($anguloRelativo - anguloRelativoRadar), 1));		
 		System.out.println("> Choque com "+$nome+" > mirar");

@@ -49,20 +49,22 @@ public class LazySpin extends AdvancedRobot {
 		// Criar base de conhecimentos e carregar regras
 		criarBC();
 
+		/*
 		// Tornar os movimentos independentes (tanque, cano e radar)
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
+		*/
 
 		while (true) {
 
 			// Tell the game that when we take move,
 			// we'll also want to turn right... a lot.
-			setTurnRight(10000);
+			// setTurnRight(10000);
 			// Limit our speed to 5
-			setMaxVelocity(5);
+			// setMaxVelocity(5);
 			// Start moving (and turning)
-			ahead(10000);
+			//ahead(10000);
 						
 			DEBUG.mensagem("inicio turno");
 			carregarEstadoRobot();
