@@ -7,8 +7,9 @@ public class Acao {
 	private double     parametro;
 	private int        prioridade;
 
-	private AdvancedRobot robot;   // Referncia al robot que ejecutara la accion
+	private AdvancedRobot robot;
 
+	// Ações gerais
 	public static final int AVANCAR=1;
 	public static final int RETROCEDER=2;
 	public static final int STOP=3;
@@ -20,7 +21,9 @@ public class Acao {
 	public static final int GIRAR_RADAR_ESQ=9;
 	public static final int GIRAR_CANHAO_DIR=10;
 	public static final int GIRAR_CANHAO_ESQ=11;
-
+	
+	// Ações especificas
+	public static final int MOVIMENTO_CIRCULO=12;
 
 	public Acao() {
 	}
@@ -67,12 +70,19 @@ public class Acao {
 			case Acao.RETROCEDER: robot.setBack(parametro); break;
 			case Acao.STOP: robot.setStop(); break;
 			case Acao.VELOCIDADE: robot.setMaxVelocity(parametro);break;
+			
 			case Acao.GIRAR_CANHAO_DIR: robot.setTurnGunRight(parametro); break;
 			case Acao.GIRAR_CANHAO_ESQ: robot.setTurnGunLeft(parametro); break;
 			case Acao.GIRAR_RADAR_DIR: robot.setTurnRadarRight(parametro); break;
 			case Acao.GIRAR_RADAR_ESQ: robot.setTurnRadarLeft(parametro); break;
 			case Acao.GIRAR_TANQUE_DIR: robot.setTurnRight(parametro); break;
 			case Acao.GIRAR_TANQUE_ESQ: robot.setTurnLeft(parametro); break;
+			
+			case Acao.MOVIMENTO_CIRCULO:
+				robot.setTurnRight(360);
+				robot.setMaxVelocity(5);
+				robot.ahead(parametro);
+				break;
 			}
 		}
 	}
@@ -84,16 +94,17 @@ public class Acao {
 	public String toString(){
 		String etqTipo="";
 		switch (this.tipo) {
-		case Acao.DISPARAR:etqTipo="Disparar"; break;
-		case Acao.AVANCAR: etqTipo="Avancar"; break;
-		case Acao.RETROCEDER: etqTipo="Retroceder"; break;
-		case Acao.STOP: etqTipo="Stop"; break;
-		case Acao.GIRAR_CANHAO_DIR: etqTipo="Girar cano: direita"; break;
-		case Acao.GIRAR_CANHAO_ESQ: etqTipo="Girar cano: esquerda"; break;
-		case Acao.GIRAR_RADAR_DIR: etqTipo="Girar radar: direita"; break;
-		case Acao.GIRAR_RADAR_ESQ: etqTipo="Girar radar: esquerda"; break;
-		case Acao.GIRAR_TANQUE_DIR: etqTipo="Girar tanque: direita"; break;
-		case Acao.GIRAR_TANQUE_ESQ: etqTipo="Girar tanque: esqueda"; break;
+			case Acao.DISPARAR:etqTipo="Disparar"; break;
+			case Acao.AVANCAR: etqTipo="Avancar"; break;
+			case Acao.RETROCEDER: etqTipo="Retroceder"; break;
+			case Acao.STOP: etqTipo="Stop"; break;
+			case Acao.GIRAR_CANHAO_DIR: etqTipo="Girar cano: direita"; break;
+			case Acao.GIRAR_CANHAO_ESQ: etqTipo="Girar cano: esquerda"; break;
+			case Acao.GIRAR_RADAR_DIR: etqTipo="Girar radar: direita"; break;
+			case Acao.GIRAR_RADAR_ESQ: etqTipo="Girar radar: esquerda"; break;
+			case Acao.GIRAR_TANQUE_DIR: etqTipo="Girar tanque: direita"; break;
+			case Acao.GIRAR_TANQUE_ESQ: etqTipo="Girar tanque: esqueda"; break;
+			case Acao.MOVIMENTO_CIRCULO: etqTipo="Movimento circular"; break;
 		}
 		return "Acao> tipo: "+etqTipo+", parametro: "+parametro+", prioridade:"+prioridade;
 

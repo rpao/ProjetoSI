@@ -1,16 +1,6 @@
 package ProjetoSI;
 
-import robocode.AdvancedRobot;
-import robocode.BulletHitBulletEvent;
-import robocode.BulletHitEvent;
-import robocode.BulletMissedEvent;
-import robocode.HitByBulletEvent;
-import robocode.HitRobotEvent;
-import robocode.HitWallEvent;
-import robocode.RobotDeathEvent;
-import robocode.ScannedRobotEvent;
-
-import java.awt.*;
+import java.awt.Color;
 import java.util.Vector;
 
 import org.drools.KnowledgeBase;
@@ -23,7 +13,18 @@ import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.FactHandle;
 import org.drools.runtime.rule.QueryResultsRow;
 
+import robocode.AdvancedRobot;
+import robocode.BulletHitBulletEvent;
+import robocode.BulletHitEvent;
+import robocode.BulletMissedEvent;
+import robocode.HitByBulletEvent;
+import robocode.HitRobotEvent;
+import robocode.HitWallEvent;
+import robocode.RobotDeathEvent;
+import robocode.ScannedRobotEvent;
+
 public class LazySpin extends AdvancedRobot {
+
 	public static String REGRAS = "ProjetoSI/regras/LazySpin.drl";
 	public static String CONSULTA_ACOES = "consulta_acoes";
 
@@ -32,16 +33,16 @@ public class LazySpin extends AdvancedRobot {
 	private StatefulKnowledgeSession ksession;
 	private Vector<FactHandle> refFatosAtuais = new Vector<FactHandle>();
 
-	public LazySpin(){
 
+	public LazySpin(){
 	}
 
 	@Override
 	public void run() {
-		// Set colors
-		setBodyColor(Color.WHITE);
-		setGunColor(Color.YELLOW);
-		setRadarColor(Color.ORANGE);
+		//setColors(Color.RED, Color.BLACK, Color.RED);
+		setBodyColor(Color.BLACK);
+		setGunColor(Color.BLACK);
+		setRadarColor(Color.BLACK);
 		setScanColor(Color.BLACK);
 
 		DEBUG.habilitarModoDebug(System.getProperty("robot.debug", "true").equals("true"));    	
@@ -49,23 +50,12 @@ public class LazySpin extends AdvancedRobot {
 		// Criar base de conhecimentos e carregar regras
 		criarBC();
 
-		/*
 		// Tornar os movimentos independentes (tanque, cano e radar)
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
-		*/
 
 		while (true) {
-
-			// Tell the game that when we take move,
-			// we'll also want to turn right... a lot.
-			// setTurnRight(10000);
-			// Limit our speed to 5
-			// setMaxVelocity(5);
-			// Start moving (and turning)
-			//ahead(10000);
-						
 			DEBUG.mensagem("inicio turno");
 			carregarEstadoRobot();
 			carregarEstadoBatalha();
@@ -147,7 +137,7 @@ public class LazySpin extends AdvancedRobot {
 			Acao.iniciarExecucao();
 		}
 	}
-
+ 
 	@Override
 	public void onBulletHit(BulletHitEvent event) {
 		refFatosAtuais.add(ksession.insert(event));

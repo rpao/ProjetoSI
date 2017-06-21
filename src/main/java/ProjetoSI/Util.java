@@ -1,6 +1,13 @@
 package ProjetoSI;
 
 public class Util {
+	public static boolean NotFromTeam(String name) {
+		if (name.contains("ProjetoSI") == true)
+			return false;
+		
+		return true;
+	}
+	
 	public static double anguloAbsoluto(double anguloBase, double anguloRelativo) {
 		double angulo = (anguloBase + anguloRelativo) % 360;
 

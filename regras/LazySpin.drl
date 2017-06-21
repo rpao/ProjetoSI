@@ -1,5 +1,4 @@
 package ProjetoSI;
-
 import ProjetoSI.*;
 import robocode.*;
 import robocode.ScannedRobotEvent;
@@ -9,42 +8,97 @@ query "consulta_acoes"
 	acao: Acao()
 end
 
-// Excluí ações com prioridades conflitantes
+// Alvo selecionado
+declare Alvo
+	nome: String
+	x: double
+	y: double
+	distancia: double
+end
+
 rule "DEPURAR ACOES"
 	when
 		$acao: Acao($tipo: tipo, $prioridade1: prioridade)
-		$acao2: Acao(tipo==$tipo, $prioridade2: prioridade)
-		eval ($prioridade1 > $prioridade2)
+		$acao2: Acao(tipo == $tipo, $prioridade2: prioridade)
+		eval($prioridade1 > $prioridade2)
 	then
 		retract($acao2);
-		System.out.println("> Depurar acoes por prioridade");
+		System.out.println("> Depurar acoes por prioridade...");
 end
 
-rule 'GIRAR'
+rule "GIRAR RADAR"
 	when
-		EstadoRobot( distanceRemaining == 0 )
-		$batalha: EstadoBatalha()
+		not (exists ScannedRobotEvent())
 	then
-		insert(new Acao(Acao.GIRAR_TANQUE_DIR, 360, 1));
-		insert(new Acao(Acao.VELOCIDADE, 5, 1));
-		insert(new Acao(Acao.AVANCAR, 1000, 1));
-		System.out.println("> Girar...");
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 1));
+		System.out.println("> Girar radar...");
 end
 
-// Dispara contra o alvo na mira
-rule "DISPARAR"
+rule "NOVO ALVO SELECIONADO"
+	when
+		not (exists Alvo())
+		$alvoEscaneado: ScannedRobotEvent()
+		$status: EstadoRobot()
+		eval (Util.NotFromTeam($alvoEscaneado.getName()))
+	then
+		Alvo alvo = new Alvo();
+		double anguloAbsoluto = Util.anguloAbsoluto($status.getHeading(), $alvoEscaneado.getBearing());
+		alvo.setNome($alvoEscaneado.getName());
+		alvo.setX(Util.calcularX($status.getX(), anguloAbsoluto, $alvoEscaneado.getDistance()));                                            
+		alvo.setY(Util.calcularX($status.getY(), anguloAbsoluto, $alvoEscaneado.getDistance()));
+		alvo.setDistancia($alvoEscaneado.getDistance());
+		insert(alvo);
+
+		double anguloRelativoCanhao = Util.anguloRelativo($status.getHeading(), $status.getGunHeading()); // Descontar el desplazam. actual del canon 
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCanhao), 1));
+		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading()); // Descontar el desplazam. actual del radar  
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 1));
+		System.out.println("> Novo alvo selecionado..."); 
+end
+
+rule "ALVO DETECTADO > ATUALIZAR LOCALIZACAO"
    when
+		$dadosAlvo: Alvo($nomeAlvo: nome)
 		$status : EstadoRobot()
-		$alvoEscaneado: ScannedRobotEvent($nomeAlvo: name, $anguloRelativo: bearing)
-		eval (Math.abs($anguloRelativo - Util.anguloRelativo($status.getHeading(), $status.getGunHeading())) <= 10)   
-   then	
-		/*
-		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
-		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
-		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
-		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
-		System.out.println("> Mirar...");
-		*/
-		insert(new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
-		System.out.println("> Disparar Contra "+$nomeAlvo);
-end 
+		$alvoEscaneado: ScannedRobotEvent(name == $nomeAlvo)
+   then
+		double anguloAbsoluto = Util.anguloAbsoluto($status.getHeading(), $alvoEscaneado.getBearing());
+		$dadosAlvo.setX(Util.calcularX($status.getX(), anguloAbsoluto, $alvoEscaneado.getDistance()));                                            
+		$dadosAlvo.setY(Util.calcularX($status.getY(), anguloAbsoluto, $alvoEscaneado.getDistance()));
+		$dadosAlvo.setDistancia($alvoEscaneado.getDistance());
+
+		double anguloRelativoCanhao = Util.anguloRelativo($status.getHeading(), $status.getGunHeading()); // Descontar el desplazam. actual del canon 
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCanhao), 1));
+		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading()); // Descontar el desplazam. actual del radar  
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 1));
+		System.out.println("> Atualizando localizacao do alvo...");
+end
+
+rule "DISPARAR"
+	when
+		$status : EstadoRobot()
+		Alvo ($nomeAlvo: nome)
+		ScannedRobotEvent(name == $nomeAlvo, $anguloRelativoAlvo: bearing)                       
+		eval (Math.abs($anguloRelativoAlvo - Util.anguloRelativo($status.getHeading(), $status.getGunHeading())) <= 2)   
+	then
+		insert(new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 1));
+		System.out.println("> Dispara contra "+$nomeAlvo+"...");
+end
+
+rule "ALVO DESTRUIDO"
+	when
+		$alvo: Alvo ($nomeAlvo: nome)
+		RobotDeathEvent( name == $nomeAlvo )
+	then 
+		retract($alvo);
+		System.out.println("> Alvo destruido...");
+end
+
+rule "ATINGIDO > SE MOVIMENTAR"
+	when
+		$status : EstadoRobot()
+		HitByBulletEvent()
+	then 
+		insert(new Acao(Acao.MOVIMENTO_CIRCULO, 200, 1));	
+		System.out.println("> Fui atingido > Mover em circulo...");
+end
