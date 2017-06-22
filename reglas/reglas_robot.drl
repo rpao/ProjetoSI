@@ -152,3 +152,12 @@ then
    insert(new Accion(Accion.GIRAR_TANQUE_DER, (- $anguloRelativo*1.50), 5));
    insert(new Accion(Accion.AVANZAR, 100, 5));
 end
+
+rule "INIMIGO ESCANEADO"
+	when
+		$roboEscaneado: ScannedRobot()
+		$batalha: EstadoBatalha()
+	then
+		$batalha.addRoboEscaneado($roboEscaneado);
+		System.out.println($roboEscaneado);
+end
