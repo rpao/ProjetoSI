@@ -68,6 +68,12 @@ public class LazySpin extends AdvancedRobot {
 
 			// Recuperar Acoes
 			Vector<Acao> acoes = recuperarAcoes();
+			if (acoes.size() > 10){
+				for(int i =0; i < 5; i++){
+					DEBUG.mensagem("Removendo excesso de acoes");
+					acoes.remove(i);
+				}
+			}
 			DEBUG.mensagem("acoes resultantes");
 			DEBUG.despejarAcoes(acoes);
 

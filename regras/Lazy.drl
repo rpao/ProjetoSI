@@ -45,3 +45,14 @@ rule "DISPARAR"
 		insert(new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
 		System.out.println("> Disparar Contra "+$nomeAlvo);
 end
+
+// Andar apenas quando for atingido e estiver com baixa energia
+rule "FUGIR"
+	when
+		$status : EstadoRobot()		
+		eval ($status.getEnergy() <= 20)
+	then
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, 90, 5));
+		insert(new Acao(Acao.AVANCAR, 100, 5));
+		System.out.println("> Fugir...");
+end
