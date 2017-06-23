@@ -6,6 +6,7 @@
 package RobocodeSI;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import robocode.ScannedRobotEvent;
 /**
@@ -80,13 +81,20 @@ public class EstadoBatalla {
     private ArrayList<ScannedRobotEvent> robosEscaneados = new ArrayList<ScannedRobotEvent>();
 
     public void addRoboEscaneado(ScannedRobotEvent e){
-    		robosEscaneados.add(e);
-    		DEBUG.mensaje("Adicionou RObo" + e.getName());
-    	}
+    		robosEscaneados.add(e); 	
+    		DEBUG.mensaje("ROBO ADICIONADO" + e.getName());
+    }
+    
+    public boolean hasRobotEscaneado(ScannedRobotEvent e){
+    	DEBUG.mensaje("Já CONTEM ROBO" + e.getName());
+    	return robosEscaneados.contains(e);
     	
-    	public void cleanRoboEscaneado(){
-    		robosEscaneados.clear();
-    		DEBUG.mensaje("LimpouRobos");
-    	}
+    }
+    	
+    public void cleanRoboEscaneado(){
+    	DEBUG.mensaje("Limpou Robos");
+    	robosEscaneados.clear();
+    
+    }
 
 }

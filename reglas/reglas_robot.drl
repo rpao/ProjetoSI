@@ -3,7 +3,7 @@ import RobocodeSI.*;
 import robocode.*;
 import robocode.ScannedRobotEvent;
 
-// Se debe incluir SIEMPRE la definiciÃ³n de esta consulta, la usa el robot para recuperar las acciones
+// Se debe incluir SIEMPRE la definición de esta consulta, la usa el robot para recuperar las acciones
 query "consulta_acciones"
   accion: Accion()
 end
@@ -17,7 +17,7 @@ declare Victima
 end
 
 // Regla de conveniencia: elimina acciones del mismo tipo con menor prioridad
-// Si no se hiciera el robot ejecutarÃ­a la Ãºltima acciÃ³n insertada sin atender a su pioridad
+// Si no se hiciera el robot ejecutaría la última acción insertada sin atender a su pioridad
 rule "depurar acciones del mismo tipo"
 when
 	$accion1: Accion($tipo: tipo, $prioridad1: prioridad)
@@ -32,12 +32,13 @@ end
 rule "sin robots a la vista -> giro completo del radar"
 when
 	not (exists ScannedRobotEvent())
+	$batalla: EstadoBatalla()
 then
 	insert (new Accion(Accion.GIRAR_RADAR_DER, 360, 1));
+	$batalla.cleanRoboEscaneado();
 	System.out.println("regla 2");
 end
 
-// Cuando esta parado y no hay victima girar radar 360 y moverse al azar
 rule "parado sin victima -> moverse al azar (girar+avanzar)"
 when
   EstadoRobot( distanceRemaining == 0 )
@@ -52,7 +53,7 @@ then
   System.out.println("regla 3");
 end
 
-// Victima detectada por radar, actualizar su localizacion e ir hacia ella apuntÃ¡ndola con caÃ±on y radar
+// Victima detectada por radar, actualizar su localizacion e ir hacia ella apuntándola con cañon y radar
 rule "victima detectada -> actualizar datos e ir hacia ella"
    when
       $datosVictima: Victima ($nombreVictima: nombre)
@@ -72,13 +73,13 @@ rule "victima detectada -> actualizar datos e ir hacia ella"
       insert(new Accion(Accion.AVANZAR, ($victimaEscaneada.getDistance()-100), 1));
 end
 
-// Victima detectada por radar, si estÃ¡ en el punto de mira (anguloRelativoCaÃ±Ã³n == anguloRelativoVictima) con un margen de 2 grados, disparar con el maximo disponible
-//  (se activarÃ¡ a lavez que la regla anterior)
+// Victima detectada por radar, si está en el punto de mira (anguloRelativoCañón == anguloRelativoVictima) con un margen de 2 grados, disparar con el maximo disponible
+//  (se activará a lavez que la regla anterior)
 rule "victima en punto de mira -> disparar"
    when
       $status : EstadoRobot()
       Victima ($nombreVictima: nombre)
-      // Victima detectada y caÃ±on apunta en su angulo (con un margen de 2 grados)
+      // Victima detectada y cañon apunta en su angulo (con un margen de 2 grados)
       ScannedRobotEvent(name == $nombreVictima, $anguloRelativoVictima: bearing)                       
       eval (Math.abs($anguloRelativoVictima - Auxiliar.anguloRelativo($status.getHeading(), $status.getGunHeading())) <= 2)   
    then
@@ -86,7 +87,7 @@ rule "victima en punto de mira -> disparar"
       System.out.println("Victima "+$nombreVictima+" a tiro => disparar");
 end
 
-// Cuando no hay una vÃ­ctima seÃ±alada y se escanea un robot,  anotarlo como vÃ­ctima e ir hacia Ã©l apuntando radar y caÃ±Ã³n
+// Cuando no hay una víctima señalada y se escanea un robot,  anotarlo como víctima e ir hacia él apuntando radar y cañón
 rule "sin victima -> tomar la primera que aparezca"
 when
 	not (exists Victima())
@@ -131,6 +132,7 @@ then
    insert(new Accion(Accion.AVANZAR, 100, 5));
 end
 
+
 // Al chocar con victima, retroceder
 //   (tiene prioridad 5 para evitar que otras acciones "normales" nos hagan quedar estancados)  
 rule "choque con victima"
@@ -141,7 +143,7 @@ then
    insert(new Accion(Accion.RETROCEDER, 100, 5));
 end
 
-// Al chocar con otro robot que no sea la vÃ­ctima (o si esta no existe), salir "rebotado" en el angulo opuesto
+// Al chocar con otro robot que no sea la víctima (o si esta no existe), salir "rebotado" en el angulo opuesto
 //   (tiene prioridad 5 para evitar que otras acciones "normales" nos hagan quedar estancados)  
 rule "choque con otro robot"
 when
@@ -153,11 +155,20 @@ then
    insert(new Accion(Accion.AVANZAR, 100, 5));
 end
 
-rule "INIMIGO ESCANEADO"
+rule "Inimigo Novo Escaneado"
 	when
-		$roboEscaneado: ScannedRobot()
-		$batalha: EstadoBatalha()
+		$roboEscaneado: ScannedRobotEvent()
+		$batalha: EstadoBatalla()
 	then
 		$batalha.addRoboEscaneado($roboEscaneado);
-		System.out.println($roboEscaneado);
 end
+
+rule "Inimigo Antigo Escaneado"
+	when
+		$roboEscaneado: ScannedRobotEvent()
+		$batalha: EstadoBatalla()
+		$batalha.hasRobotEscaneado($roboEscaneado)
+	then
+		insert(new Accion(Accion.RETROCEDER, 10, 5));
+end
+
