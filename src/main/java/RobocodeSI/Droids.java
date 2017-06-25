@@ -1,10 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package RobocodeSI;
 
 import java.util.Vector;
+
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
 import org.drools.builder.KnowledgeBuilder;
@@ -14,25 +11,22 @@ import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.FactHandle;
 import org.drools.runtime.rule.QueryResultsRow;
-import robocode.AdvancedRobot;
+
 import robocode.BulletHitBulletEvent;
 import robocode.BulletHitEvent;
 import robocode.BulletMissedEvent;
+import robocode.Droid;
 import robocode.HitByBulletEvent;
 import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
+import robocode.MessageEvent;
 import robocode.RobotDeathEvent;
-import robocode.RobotStatus;
 import robocode.ScannedRobotEvent;
-import robocode.StatusEvent;
+import robocode.TeamRobot;
 
-/**
- *
- * @author ribadas
- */
-public class RobotDroolsExemplo extends AdvancedRobot {
-
-	public static String FICHERO_REGLAS = "RobocodeSI/reglas/reglas_robot.drl";
+public class Droids extends TeamRobot implements Droid {
+	
+	public static String FICHERO_REGLAS = "RobocodeSI/reglas/reglas_droid.drl";
     public static String CONSULTA_ACCIONES = "consulta_acciones";
     
     private KnowledgeBuilder kbuilder;
@@ -40,8 +34,7 @@ public class RobotDroolsExemplo extends AdvancedRobot {
     private StatefulKnowledgeSession ksession;  // Memoria activa
     private Vector<FactHandle> referenciasHechosActuales = new Vector<FactHandle>();
 
-    
-    public RobotDroolsExemplo(){
+    public Droids(){
     }
     
     @Override
@@ -85,13 +78,13 @@ public class RobotDroolsExemplo extends AdvancedRobot {
 
 
     private void crearBaseConocimiento() {
-        String ficheroReglas = System.getProperty("robot.reglas", RobotDroolsExemplo.FICHERO_REGLAS);
+        String ficheroReglas = System.getProperty("robot.reglas", RoboLider.FICHERO_REGLAS);
 
         DEBUG.mensaje("crear base de conocimientos");
         kbuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
         
         DEBUG.mensaje("cargar reglas desde "+ficheroReglas);
-        kbuilder.add(ResourceFactory.newClassPathResource(ficheroReglas, RobotDroolsExemplo.class), ResourceType.DRL);
+        kbuilder.add(ResourceFactory.newClassPathResource(ficheroReglas, RoboLider.class), ResourceType.DRL);
         if (kbuilder.hasErrors()) {
             System.err.println(kbuilder.getErrors().toString());
         }
@@ -130,7 +123,7 @@ public class RobotDroolsExemplo extends AdvancedRobot {
         Accion accion;
         Vector<Accion> listaAcciones = new Vector<Accion>();
 
-        for (QueryResultsRow resultado : ksession.getQueryResults(RobotDroolsExemplo.CONSULTA_ACCIONES)) {
+        for (QueryResultsRow resultado : ksession.getQueryResults(Droids.CONSULTA_ACCIONES)) {
             accion = (Accion) resultado.get("accion");  // Obtener el objeto accion
             accion.setRobot(this);                      // Vincularlo al robot actual
             listaAcciones.add(accion);
@@ -151,7 +144,8 @@ public class RobotDroolsExemplo extends AdvancedRobot {
     public void onBulletHit(BulletHitEvent event) {
           referenciasHechosActuales.add(ksession.insert(event));
     }
-
+    
+   
     @Override
     public void onBulletHitBullet(BulletHitBulletEvent event) {
         referenciasHechosActuales.add(ksession.insert(event));
@@ -182,10 +176,8 @@ public class RobotDroolsExemplo extends AdvancedRobot {
         referenciasHechosActuales.add(ksession.insert(event));
     }
 
-    @Override
-    public void onScannedRobot(ScannedRobotEvent event) {
-        referenciasHechosActuales.add(ksession.insert(event));
-    }
-
-
+	@Override
+	public void onMessageReceived(MessageEvent event) {
+		 referenciasHechosActuales.add(ksession.insert(event));
+	}
 }

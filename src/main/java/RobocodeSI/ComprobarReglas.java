@@ -23,15 +23,21 @@ import robocode.*;
  * @author ribadas
  */
 public class ComprobarReglas {
-
-	public static String FICHERO_REGLAS = "RobocodeSI/reglas/reglas_robot.drl";
-    public static String CONSULTA_ACCIONES = "consulta_acciones";
+	
+	int robo = 0;
+	public static String FICHERO_REGLAS = "";
+    public static String CONSULTA_ACCIONES = "";
     private KnowledgeBuilder kbuilder;
     private KnowledgeBase kbase;                // Base de conocimientos
     private StatefulKnowledgeSession ksession;  // Memoria activa
     private Vector<FactHandle> referenciasHechosActuales = new Vector<FactHandle>();
 
-    public ComprobarReglas() {
+    public ComprobarReglas(String ficheroReglas, String consultaAcciones, int robo) {
+    	
+    	FICHERO_REGLAS = ficheroReglas;
+    	CONSULTA_ACCIONES = consultaAcciones;
+    	this.robo = robo;
+    	
     	String modoDebug = System.getProperty("robot.debug", "true");
     	DEBUG.habilitarModoDebug(modoDebug.equals("true"));
         crearBaseConocimiento();
@@ -39,6 +45,7 @@ public class ComprobarReglas {
     }
 
 	public void cargarEventos() {
+		@SuppressWarnings("deprecation")
 		ScannedRobotEvent e = new ScannedRobotEvent("pepe", 100, 10, 10, 10, 10);
         FactHandle referenciaHecho = ksession.insert(e);
         referenciasHechosActuales.add(referenciaHecho);
@@ -73,20 +80,31 @@ public class ComprobarReglas {
         ksession = kbase.newStatefulKnowledgeSession();
     }
 
-    public static void main(String args[]) {
-        ComprobarReglas d = new ComprobarReglas();
-    }
+   
 
     private List<Accion> recuperarAcciones() {
         Accion accion;
         Vector<Accion> listaAcciones = new Vector<Accion>();
-
-        for (QueryResultsRow resultado : ksession.getQueryResults(RobotDroolsExemplo.CONSULTA_ACCIONES)) {
-            accion = (Accion) resultado.get("accion");  // Obtener el objeto accion
-            accion.setRobot(null);                      // Vincularlo al robot actual
-            listaAcciones.add(accion);
-            ksession.retract(resultado.getFactHandle("accion")); // Eliminar el hecho de la memoria activa
+        
+        if(robo == 1){
+        	for (QueryResultsRow resultado : ksession.getQueryResults(RoboLider.CONSULTA_ACCIONES)) {
+                accion = (Accion) resultado.get("accion");  // Obtener el objeto accion
+                accion.setRobot(null);                      // Vincularlo al robot actual
+                listaAcciones.add(accion);
+                ksession.retract(resultado.getFactHandle("accion")); // Eliminar el hecho de la memoria activa
+            }
         }
+        
+        if(robo == 2){
+        	for (QueryResultsRow resultado : ksession.getQueryResults(Droids.CONSULTA_ACCIONES)) {
+                accion = (Accion) resultado.get("accion");  // Obtener el objeto accion
+                accion.setRobot(null);                      // Vincularlo al robot actual
+                listaAcciones.add(accion);
+                ksession.retract(resultado.getFactHandle("accion")); // Eliminar el hecho de la memoria activa
+            }
+        }
+        
+        
 
         return listaAcciones;
     }

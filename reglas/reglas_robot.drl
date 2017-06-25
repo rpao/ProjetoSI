@@ -2,13 +2,12 @@ package RobocodeSI
 import RobocodeSI.*;
 import robocode.*;
 import robocode.ScannedRobotEvent;
+import robocode.util.Utils;
 
-// Se debe incluir SIEMPRE la definición de esta consulta, la usa el robot para recuperar las acciones
 query "consulta_acciones"
   accion: Accion()
 end
 
-// Hecho para almacenar informacion de la victima seleccionada (si existe)
 declare Victima
    nombre: String
    x: double
@@ -16,159 +15,128 @@ declare Victima
    distancia: double
 end
 
-// Regla de conveniencia: elimina acciones del mismo tipo con menor prioridad
-// Si no se hiciera el robot ejecutaría la última acción insertada sin atender a su pioridad
-rule "depurar acciones del mismo tipo"
+rule "Morri"
+when
+	RobotDeathEvent()
+then
+	insert(new Accion(Accion.SEND_MESSAGE, 5000, 6));
+end
+
+/**
+rule "Messagem Recebida -->  Robot"
+when
+	$messageEvent: MessageEvent()
+then
+	System.out.println("Robot Mensagem Recebida =" + $messageEvent.getMessage() + " | " $messageEvent.getSender);
+end
+**/
+
+rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 when
 	$accion1: Accion($tipo: tipo, $prioridad1: prioridad)
 	$accion2: Accion(tipo==$tipo, $prioridad2: prioridad)
 	eval ($prioridad1 > $prioridad2)
 then
     retract($accion2);     // Elimina la accion menos prioritaria 
-    System.out.println("regla 1");
+    System.out.println("Depurar Acoes");
 end
 
-// Cuando no hay robots detectados forzar un giro completo del radar
-rule "sin robots a la vista -> giro completo del radar"
-when
-	not (exists ScannedRobotEvent())
-	$batalla: EstadoBatalla()
-then
-	insert (new Accion(Accion.GIRAR_RADAR_DER, 360, 1));
-	$batalla.cleanRoboEscaneado();
-	System.out.println("regla 2");
-end
-
-rule "parado sin victima -> moverse al azar (girar+avanzar)"
-when
-  EstadoRobot( distanceRemaining == 0 )
-  not (exists Victima())
-  $batalla: EstadoBatalla()
-then
-  insert(new Accion(Accion.GIRAR_RADAR_DER, 360, 1));
-  insert(new Accion(Accion.GIRAR_TANQUE_DER, (360*Math.random() - 180), 1));
-  insert(new Accion(Accion.GIRAR_CANON_DER, (360*Math.random() - 180), 1));
-  double avance = Math.min($batalla.getAnchoCampo(), $batalla.getAltoCampo())*Math.random();
-  insert(new Accion(Accion.AVANZAR, avance, 1));
-  System.out.println("regla 3");
-end
-
-// Victima detectada por radar, actualizar su localizacion e ir hacia ella apuntándola con cañon y radar
-rule "victima detectada -> actualizar datos e ir hacia ella"
-   when
-      $datosVictima: Victima ($nombreVictima: nombre)
-      $status : EstadoRobot()
-      $victimaEscaneada: ScannedRobotEvent(name == $nombreVictima)
-   then
-      double anguloAbsoluto = Auxiliar.anguloAbsoluto($status.getHeading(), $victimaEscaneada.getBearing());
-      $datosVictima.setX(Auxiliar.calcularX($status.getX(), anguloAbsoluto, $victimaEscaneada.getDistance()));                                            
-      $datosVictima.setY(Auxiliar.calcularX($status.getY(), anguloAbsoluto, $victimaEscaneada.getDistance()));
-      $datosVictima.setDistancia($victimaEscaneada.getDistance());
-      
-      insert(new Accion(Accion.GIRAR_TANQUE_DER, $victimaEscaneada.getBearing(), 1));
-      double anguloRelativoCanon = Auxiliar.anguloRelativo($status.getHeading(), $status.getGunHeading()); // Descontar el desplazam. actual del canon 
-      insert(new Accion(Accion.GIRAR_CANON_DER, ($victimaEscaneada.getBearing() - anguloRelativoCanon), 1));
-      double anguloRelativoRadar =  Auxiliar.anguloRelativo($status.getHeading(), $status.getRadarHeading()); // Descontar el desplazam. actual del radar  
-      insert(new Accion(Accion.GIRAR_RADAR_DER, ($victimaEscaneada.getBearing() - anguloRelativoRadar), 1));
-      insert(new Accion(Accion.AVANZAR, ($victimaEscaneada.getDistance()-100), 1));
-end
-
-// Victima detectada por radar, si está en el punto de mira (anguloRelativoCañón == anguloRelativoVictima) con un margen de 2 grados, disparar con el maximo disponible
-//  (se activará a lavez que la regla anterior)
-rule "victima en punto de mira -> disparar"
-   when
-      $status : EstadoRobot()
-      Victima ($nombreVictima: nombre)
-      // Victima detectada y cañon apunta en su angulo (con un margen de 2 grados)
-      ScannedRobotEvent(name == $nombreVictima, $anguloRelativoVictima: bearing)                       
-      eval (Math.abs($anguloRelativoVictima - Auxiliar.anguloRelativo($status.getHeading(), $status.getGunHeading())) <= 2)   
-   then
-      insert(new Accion(Accion.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 1));
-      System.out.println("Victima "+$nombreVictima+" a tiro => disparar");
-end
-
-// Cuando no hay una víctima señalada y se escanea un robot,  anotarlo como víctima e ir hacia él apuntando radar y cañón
-rule "sin victima -> tomar la primera que aparezca"
-when
-	not (exists Victima())
-	$victimaEscaneada: ScannedRobotEvent()
-	$status: EstadoRobot()
-then
-    Victima victima = new Victima();
-      double anguloAbsoluto = Auxiliar.anguloAbsoluto($status.getHeading(), $victimaEscaneada.getBearing());
-      victima.setNombre($victimaEscaneada.getName());
-      victima.setX(Auxiliar.calcularX($status.getX(), anguloAbsoluto, $victimaEscaneada.getDistance()));                                            
-      victima.setY(Auxiliar.calcularX($status.getY(), anguloAbsoluto, $victimaEscaneada.getDistance()));
-      victima.setDistancia($victimaEscaneada.getDistance());
-      insert(victima);
-      
-      insert(new Accion(Accion.GIRAR_TANQUE_DER, $victimaEscaneada.getBearing(), 1));
-      double anguloRelativoCanon = Auxiliar.anguloRelativo($status.getHeading(), $status.getGunHeading()); // Descontar el desplazam. actual del canon 
-      insert(new Accion(Accion.GIRAR_CANON_DER, ($victimaEscaneada.getBearing() - anguloRelativoCanon), 1));
-      double anguloRelativoRadar =  Auxiliar.anguloRelativo($status.getHeading(), $status.getRadarHeading()); // Descontar el desplazam. actual del radar  
-      insert(new Accion(Accion.GIRAR_RADAR_DER, ($victimaEscaneada.getBearing() - anguloRelativoRadar), 1));
-      insert(new Accion(Accion.AVANZAR, ($victimaEscaneada.getDistance()-100), 1));    
-      System.out.println("regla 6"); 
-end
-
-// Eliminar el hecho Victima() actual una vez liquidada
-rule "muerte de la victima"
-when
-   $victima: Victima ($nombreVictima: nombre)
-   RobotDeathEvent( name == $nombreVictima )
-then 
-   retract($victima);
-   System.out.println("Uno menos");
-end
-
-
-// Al chocar con un muro, salir "rebotado" en el angulo opuesto
-//   (tiene prioridad 5 para evitar que otras acciones "normales" nos hagan quedar estancados)  
-rule "choque con muro"
-when
-   HitWallEvent($anguloRelativo: bearing)
-then
-   insert(new Accion(Accion.GIRAR_TANQUE_DER, (- $anguloRelativo), 5));
-   insert(new Accion(Accion.AVANZAR, 100, 5));
-end
-
-
-// Al chocar con victima, retroceder
-//   (tiene prioridad 5 para evitar que otras acciones "normales" nos hagan quedar estancados)  
-rule "choque con victima"
-when
-   HitRobotEvent($nombre: name, $anguloRelativo: bearing)
-   Victima(nombre == $nombre)
-then
-   insert(new Accion(Accion.RETROCEDER, 100, 5));
-end
-
-// Al chocar con otro robot que no sea la víctima (o si esta no existe), salir "rebotado" en el angulo opuesto
-//   (tiene prioridad 5 para evitar que otras acciones "normales" nos hagan quedar estancados)  
-rule "choque con otro robot"
-when
-   HitRobotEvent($nombre: name, $anguloRelativo: bearing)
-   (or (not (exists Victima()))
-       (Victima(nombre != $nombre)))
-then
-   insert(new Accion(Accion.GIRAR_TANQUE_DER, (- $anguloRelativo*1.50), 5));
-   insert(new Accion(Accion.AVANZAR, 100, 5));
-end
-
-rule "Inimigo Novo Escaneado"
+rule "Inimigo Novo Escaneado --> Adiciona robo a lista de robos"
 	when
 		$roboEscaneado: ScannedRobotEvent()
 		$batalha: EstadoBatalla()
 	then
 		$batalha.addRoboEscaneado($roboEscaneado);
+		System.out.println("Inimigo Novo Escaneado");
 end
 
-rule "Inimigo Antigo Escaneado"
+rule "Bateu em outro robo --> Retrocede 200 pixels"
+when
+   HitRobotEvent($nombre: name, $anguloRelativo: bearing)
+then
+   insert(new Accion(Accion.GIRAR_TANQUE_DER, (- $anguloRelativo), 6));
+   insert(new Accion(Accion.RETROCEDER, 200, 5));
+   System.out.println("Choque Com outro Robo");
+end
+
+rule "Bateu no muro --> Retrocede 200 pixels"
+when
+   HitWallEvent($anguloRelativo: bearing)
+then
+   insert(new Accion(Accion.GIRAR_TANQUE_DER, (- $anguloRelativo), 6));
+   insert(new Accion(Accion.AVANZAR, 200, 5));
+   System.out.println("Choque Com Muro");
+end
+
+rule "[Stop And Go Movement] Se está parado e inimigo atirou --> Avançar"
 	when
 		$roboEscaneado: ScannedRobotEvent()
 		$batalha: EstadoBatalla()
-		$batalha.hasRobotEscaneado($roboEscaneado)
+		eval($batalha.hasRobotEscaneado($roboEscaneado))
+		EstadoRobot (distanceRemaining == 0)
+		eval($batalha.getRoboInimigo($roboEscaneado).getEnergy() > $roboEscaneado.getEnergy());
+		
 	then
-		insert(new Accion(Accion.RETROCEDER, 10, 5));
+		
+		double avance = Auxiliar.movementStopAndGo($batalha.getRoboInimigo($roboEscaneado).getEnergy() - $roboEscaneado.getEnergy());
+		insert(new Accion(Accion.AVANZAR, avance, 4));
+		System.out.println("STOP AND GO");
 end
 
+rule "Se não existem robos próximos --> Girar o radar"
+when
+	not (exists ScannedRobotEvent())
+	not (exists Victima())
+	$batalla: EstadoBatalla()
+then
+	insert (new Accion(Accion.GIRAR_RADAR_DER, 360, 3));
+	$batalla.cleanRoboEscaneado();
+	System.out.println("Girar Radar");
+	
+end
+
+rule "Parado --> Movimento Aleatório"
+when
+  EstadoRobot( distanceRemaining == 0 )
+  $batalla: EstadoBatalla()
+  not (exists(HitRobotEvent()))
+  not (exists(HitWallEvent()))
+then
+  insert(new Accion(Accion.GIRAR_RADAR_DER, 360, 2));
+  insert(new Accion(Accion.GIRAR_TANQUE_DER, (360*Math.random() - 180), 2));
+  insert(new Accion(Accion.GIRAR_CANON_DER, (360*Math.random() - 180), 2));
+  double avance = Math.min($batalla.getAnchoCampo(), $batalla.getAltoCampo())*Math.random();
+  insert(new Accion(Accion.AVANZAR, avance, 2));
+  System.out.println("Movimento Aleatorio");
+end
+
+rule "DISPARAR"
+   when
+		$status : EstadoRobot()
+		$alvoEscaneado: ScannedRobotEvent(distance <= 200)
+   then	
+		double anguloRelativoCano = Auxiliar.anguloRelativo($status.getHeading(), $status.getGunHeading());
+		insert(new Accion(Accion.GIRAR_CANON_DER, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
+		double anguloRelativoRadar =  Auxiliar.anguloRelativo($status.getHeading(), $status.getRadarHeading());
+		insert(new Accion(Accion.GIRAR_RADAR_DER, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
+		System.out.println("> Mirar...");
+		
+		insert(new Accion(Accion.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
+		System.out.println("> Disparar Contra ");
+end
+
+rule "DISPARAR com inimigo unico"
+   when
+		$status : EstadoRobot()
+		EstadoBatalla(numeroEnemigos <= 2)
+		$alvoEscaneado: ScannedRobotEvent()
+   then	
+		double anguloRelativoCano = Auxiliar.anguloRelativo($status.getHeading(), $status.getGunHeading());
+		insert(new Accion(Accion.GIRAR_CANON_DER, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
+		double anguloRelativoRadar =  Auxiliar.anguloRelativo($status.getHeading(), $status.getRadarHeading());
+		insert(new Accion(Accion.GIRAR_RADAR_DER, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
+		System.out.println("> Mirar...");
+		
+		insert(new Accion(Accion.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
+		System.out.println("> Disparar Contra ");
+end

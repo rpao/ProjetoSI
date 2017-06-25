@@ -6,7 +6,7 @@
 package RobocodeSI;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Comparator;
 
 import robocode.ScannedRobotEvent;
 /**
@@ -81,8 +81,17 @@ public class EstadoBatalla {
     private ArrayList<ScannedRobotEvent> robosEscaneados = new ArrayList<ScannedRobotEvent>();
 
     public void addRoboEscaneado(ScannedRobotEvent e){
+    	if (e.getDistance() <= 40)	{
     		robosEscaneados.add(e); 	
     		DEBUG.mensaje("ROBO ADICIONADO" + e.getName());
+    	}
+    	
+    	robosEscaneados.sort(new Comparator<ScannedRobotEvent>() {
+			@Override
+			public int compare(ScannedRobotEvent o1, ScannedRobotEvent o2) {
+				return Double.compare(o1.getEnergy(), o2.getEnergy());
+			}
+		});
     }
     
     public boolean hasRobotEscaneado(ScannedRobotEvent e){
@@ -90,11 +99,39 @@ public class EstadoBatalla {
     	return robosEscaneados.contains(e);
     	
     }
+    
+    public ScannedRobotEvent getLesserLifeRobot(){
     	
+    	robosEscaneados.sort(new Comparator<ScannedRobotEvent>() {
+			@Override
+			public int compare(ScannedRobotEvent o1, ScannedRobotEvent o2) {
+				return Double.compare(o1.getEnergy(), o2.getEnergy());
+			}
+		});
+    	
+    	return robosEscaneados.get(0);
+    	
+    	
+    }
+    
+    public boolean isEmptyRoboEscaneados(){
+    	return robosEscaneados.isEmpty();
+    }
+   
+    public ScannedRobotEvent getRoboInimigo(ScannedRobotEvent e){
+    	
+    	for (ScannedRobotEvent i : robosEscaneados){
+    		if (i.getName() == e.getName()){
+    			return i;
+    		}
+    	}
+    	
+    	return null;
+    }
+    
     public void cleanRoboEscaneado(){
     	DEBUG.mensaje("Limpou Robos");
     	robosEscaneados.clear();
     
     }
-
 }

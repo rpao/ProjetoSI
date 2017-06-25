@@ -5,7 +5,9 @@
 
 package RobocodeSI;
 
-import robocode.AdvancedRobot;
+import java.io.IOException;
+
+import robocode.TeamRobot;
 
 /**
  *
@@ -16,7 +18,7 @@ public class Accion {
     private double     parametro;
     private int        prioridad;
 
-    private AdvancedRobot robot;   // Referncia al robot que ejecutara la accion
+    private TeamRobot robot;   // Referncia al robot que ejecutara la accion
 
     public static final int AVANZAR=1;
     public static final int RETROCEDER=2;
@@ -28,8 +30,8 @@ public class Accion {
     public static final int GIRAR_RADAR_IZQ=8;
     public static final int GIRAR_CANON_DER=9;
     public static final int GIRAR_CANON_IZQ=10;
-
-
+    public static final int SEND_MESSAGE=11;
+    
     public Accion() {
     }
 
@@ -78,11 +80,20 @@ public class Accion {
                 case Accion.GIRAR_RADAR_IZQ: robot.setTurnRadarLeft(parametro); break;
                 case Accion.GIRAR_TANQUE_DER: robot.setTurnRight(parametro); break;
                 case Accion.GIRAR_TANQUE_IZQ: robot.setTurnLeft(parametro); break;
+                case Accion.SEND_MESSAGE: 
+                	
+                	try {
+					robot.broadcastMessage(parametro);
+                	} catch (IOException e) {
+                		e.printStackTrace();
+                	}
+                	
+                break;
             }
         }
     }
 
-    void setRobot(AdvancedRobot robot) {
+    void setRobot(TeamRobot robot) {
         this.robot = robot;
     }
 
