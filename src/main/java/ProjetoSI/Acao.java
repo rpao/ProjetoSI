@@ -3,9 +3,9 @@ package ProjetoSI;
 import robocode.AdvancedRobot;
 
 public class Acao {
-	private int        tipo;
-	private double     parametro;
-	private int        prioridade;
+	private int		tipo;
+	private double	parametro;
+	private int		prioridade;
 
 	private AdvancedRobot robot;
 
@@ -79,9 +79,9 @@ public class Acao {
 			case Acao.GIRAR_TANQUE_ESQ: robot.setTurnLeft(parametro); break;
 			
 			case Acao.MOVIMENTO_CIRCULO:
-				robot.setTurnRight(360);
+				robot.setTurnRight(1000);
 				robot.setMaxVelocity(5);
-				robot.ahead(parametro);
+				robot.setBack(parametro);//robot.ahead(parametro);
 				break;
 			}
 		}

@@ -9,6 +9,7 @@ import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
+import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 import java.awt.*;
 import java.util.Vector;
@@ -27,6 +28,7 @@ public class Lazy extends AdvancedRobot {
 	public static String REGRAS = "ProjetoSI/regras/Lazy.drl";
 	public static String CONSULTA_ACOES = "consulta_acoes";
 	
+	private double posicao;	
 	private KnowledgeBuilder kbuilder;
 	private KnowledgeBase kbase;
 	private StatefulKnowledgeSession ksession;
@@ -35,7 +37,7 @@ public class Lazy extends AdvancedRobot {
 	public Lazy(){}
 
 	@Override
-	public void run() {
+	public void run() {		
 		// Set colors
 		setBodyColor(Color.BLACK);
 		setGunColor(Color.BLACK);
@@ -52,9 +54,7 @@ public class Lazy extends AdvancedRobot {
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
 		
-
-		while (true) {
-
+		while (true) {	
 			DEBUG.mensagem("inicio turno");
 			carregarEstadoRobot();
 			carregarEstadoBatalha();
@@ -73,6 +73,7 @@ public class Lazy extends AdvancedRobot {
 					acoes.remove(i);
 				}
 			}
+			
 			DEBUG.mensagem("acoes resultantes");
 			DEBUG.despejarAcoes(acoes);
 

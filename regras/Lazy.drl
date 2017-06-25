@@ -21,10 +21,13 @@ rule "DEPURAR ACOES"
 end
 
 // Gira o radar quando não há envento escaneado ou alvo selecionado
-rule 'GIRAR RADAR'
+rule "GIRAR RADAR"
 	when
+		$status : EstadoRobot()
 		not (exists ScannedRobotEvent())
 	then
+		double angulo = Util.anguloRelativo($status.getHeading(), 0);
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, angulo, 1));
 		insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 5));
 		System.out.println("> Girar radar");
 end
@@ -46,13 +49,23 @@ rule "DISPARAR"
 		System.out.println("> Disparar Contra "+$nomeAlvo);
 end
 
-// Andar apenas quando for atingido e estiver com baixa energia
-rule "FUGIR"
+// Se movimentar em caso de choque
+rule "ATINGIDO"
 	when
-		$status : EstadoRobot()		
-		eval ($status.getEnergy() <= 20)
+		$status : EstadoRobot()
+		not (exists HitWallEvent())
+		HitByBulletEvent()
 	then
-		insert(new Acao(Acao.GIRAR_TANQUE_DIR, 90, 5));
-		insert(new Acao(Acao.AVANCAR, 100, 5));
-		System.out.println("> Fugir...");
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, -$status.getHeading(),  5));
+		insert(new Acao(Acao.RETROCEDER, 100, 1));
+		System.out.println ("> Atingido > Retroceder...");
+end
+
+// Choque com muro, girar o tanque em 90 graus
+rule "CHOQUE COM MURO"
+when
+   HitWallEvent() || HitRobotEvent()
+then
+   insert(new Acao(Acao.GIRAR_TANQUE_DIR, 90, 5));
+   System.out.println ("> Choque > Mudar trajetória...");
 end
