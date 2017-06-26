@@ -1,6 +1,7 @@
 package ProjetoSI;
 
 import robocode.AdvancedRobot;
+import robocode.TeamRobot;
 
 public class EstadoRobot {
 	private final double distanceRemaining;
@@ -21,6 +22,25 @@ public class EstadoRobot {
 	private final double x;
 
 	public EstadoRobot(AdvancedRobot robot){
+		distanceRemaining = robot.getDistanceRemaining();
+		energy = robot.getEnergy();
+		gunHeading = robot.getGunHeading();
+		gunHeat = robot.getGunHeat();
+		gunTurnRemaining = robot.getGunTurnRemaining();
+		heading = robot.getHeading();
+		numRounds = robot.getNumRounds();
+		others = robot.getOthers();
+		radarHeading = robot.getRadarHeading();
+		radarTurnRemaining = robot.getRadarTurnRemaining();
+		roundNum = robot.getRoundNum();
+		time = robot.getTime();
+		turnRemaining = robot.getTurnRemaining();
+		velocity = robot.getVelocity();
+		x = robot.getX();
+		y = robot.getY();
+	}
+	
+	public EstadoRobot(TeamRobot robot){
 		distanceRemaining = robot.getDistanceRemaining();
 		energy = robot.getEnergy();
 		gunHeading = robot.getGunHeading();
@@ -107,5 +127,4 @@ public class EstadoRobot {
 		return "Estado(x: "+x+", y: "+y+", velocity: "+velocity+", energy: "+energy+", heading: "+heading+", distanceRemaining: "+distanceRemaining+")";
 
 	}
-
 }

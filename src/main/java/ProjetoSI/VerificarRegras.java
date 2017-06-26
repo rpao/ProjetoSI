@@ -2,6 +2,7 @@ package ProjetoSI;
 
 import java.util.List;
 import java.util.Vector;
+
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
 import org.drools.builder.KnowledgeBuilder;
@@ -12,20 +13,25 @@ import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.FactHandle;
 import org.drools.runtime.rule.QueryResultsRow;
 
-import robocode.*;
+import robocode.ScannedRobotEvent;
 
 public class VerificarRegras {
 	public static String REGRAS;
 	public static String CONSULTA_ACOES = "consulta_acoes";
-	
+	public static int typeRobot;
+
+	public static final int ADVANCED = 0;
+	public static final int TEAM = 1;
+
 	private KnowledgeBuilder kbuilder;
 	private KnowledgeBase kbase;                // Base de conocimientos
 	private StatefulKnowledgeSession ksession;  // Memoria activa
 	private Vector<FactHandle> refFatosAtuais = new Vector<FactHandle>();
 
-	public VerificarRegras(String regras) {
-		this.REGRAS = regras;
-		
+	public VerificarRegras(String regras, int typeRobot) {
+		VerificarRegras.REGRAS = regras;
+		VerificarRegras.typeRobot = typeRobot;
+
 		String modoDebug = System.getProperty("robot.debug", "true");
 		DEBUG.habilitarModoDebug(modoDebug.equals("true"));
 		criarBC();
@@ -41,9 +47,15 @@ public class VerificarRegras {
 		DEBUG.mensagem("fatos em memoria ativa");
 		DEBUG.despejarAcoes(ksession);
 		ksession.fireAllRules();
-		List<Acao> acoes = recuperarAcoes();
-		DEBUG.mensagem("acoes resultantes");
-		DEBUG.despejarAcoes(acoes);
+		if (VerificarRegras.typeRobot == VerificarRegras.ADVANCED){
+			List<Acao> acoes = recuperarAcoes();
+			DEBUG.mensagem("acoes resultantes");
+			DEBUG.despejarAcoes(acoes);
+		}else{
+			List<AcaoTeam> acoes = recuperarAcoesTeam();
+			DEBUG.mensagem("acoes resultantes");
+			DEBUG.despejarAcoesTeam(acoes);
+		}
 
 	}
 
@@ -75,8 +87,19 @@ public class VerificarRegras {
 			acao.setRobot(null);
 			listaAcoes.add(acao);
 			ksession.retract(resultado.getFactHandle("Acao"));
+		}		
+		return listaAcoes;
+	}
+	
+	private List<AcaoTeam> recuperarAcoesTeam() {
+		AcaoTeam acao;
+		Vector<AcaoTeam> listaAcoes = new Vector<AcaoTeam>();
+		for (QueryResultsRow resultado : ksession.getQueryResults(VerificarRegras.CONSULTA_ACOES)) {
+			acao = (AcaoTeam) resultado.get("AcaoTeam");
+			acao.setRobot(null);
+			listaAcoes.add(acao);
+			ksession.retract(resultado.getFactHandle("AcaoTeam"));
 		}
-
 		return listaAcoes;
 	}
 }

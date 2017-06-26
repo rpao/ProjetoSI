@@ -1,5 +1,13 @@
 package ProjetoSI;
 
+import java.awt.Rectangle;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Comparator;
+
+import robocode.ScannedRobotEvent;
+import robocode.util.Utils;
+
 public class Util {
 	public static boolean NotFromTeam(String name) {
 		if (name.contains("ProjetoSI") == true)
@@ -52,4 +60,23 @@ public class Util {
 
 		return Math.sqrt(offsetX*offsetX + offsetY*offsetY);
 	}
+	
+	/** Movimento Stop And Go **/
+    public static double movementStopAndGo(double energyDrop){
+    	return ((3 + (int)(energyDrop*1.999999)) << 3 );
+    }
+    
+    /** Robo de Menor Energia ** /
+    public static ScannedRobotEvent getLesserLifeRobot(ArrayList<ScannedRobotEvent> robosEscaneados){
+    	
+    	robosEscaneados.sort(new Comparator<ScannedRobotEvent>() {
+			@Override
+			public int compare(ScannedRobotEvent o1, ScannedRobotEvent o2) {
+				return Double.compare(o1.getEnergy(), o2.getEnergy());
+			}
+		});
+    	
+    	return robosEscaneados.get(0);
+    }
+    */
 }

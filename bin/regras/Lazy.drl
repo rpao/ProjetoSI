@@ -1,0 +1,71 @@
+package ProjetoSI;
+
+import ProjetoSI.*;
+import robocode.*;
+import robocode.ScannedRobotEvent;
+
+// Consultar ações na lista de ações
+query "consulta_acoes"
+	acao: Acao()
+end
+
+// Excluí ações com prioridades conflitantes
+rule "DEPURAR ACOES"
+	when
+		$acao: Acao($tipo: tipo, $prioridade1: prioridade)
+		$acao2: Acao(tipo==$tipo, $prioridade2: prioridade)
+		eval ($prioridade1 > $prioridade2)
+	then
+		retract($acao2);
+		System.out.println("> Depurar acoes por prioridade");
+end
+
+// Gira o radar quando não há envento escaneado ou alvo selecionado
+rule "GIRAR RADAR"
+	when
+		$status : EstadoRobot()
+		not (exists ScannedRobotEvent())
+	then
+		double angulo = Util.anguloRelativo($status.getHeading(), 0);
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, angulo, 1));
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 5));
+		System.out.println("> Girar radar");
+end
+
+// Dispara contra o alvo na mira
+rule "DISPARAR"
+   when
+		$status : EstadoRobot()
+		$alvoEscaneado: ScannedRobotEvent($nomeAlvo: name)
+		eval (Util.NotFromTeam($nomeAlvo))
+   then	
+		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
+		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
+		System.out.println("> Mirar...");
+		
+		insert(new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
+		System.out.println("> Disparar Contra "+$nomeAlvo);
+end
+
+// Se movimentar em caso de choque
+rule "ATINGIDO"
+	when
+		$status : EstadoRobot()
+		not (exists HitWallEvent())
+		HitByBulletEvent()
+	then
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, -$status.getHeading(),  5));
+		insert(new Acao(Acao.RETROCEDER, 100, 1));
+		System.out.println ("> Atingido > Retroceder...");
+end
+
+// Choque com muro, girar o tanque em 90 graus
+rule "CHOQUE COM MURO"
+when
+   HitWallEvent() || HitRobotEvent()
+then
+   insert(new Acao(Acao.GIRAR_TANQUE_DIR, 90, 5));
+   System.out.println ("> Choque > Mudar trajetória...");
+end
