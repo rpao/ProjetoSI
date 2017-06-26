@@ -4,9 +4,9 @@ import java.io.IOException;
 import robocode.TeamRobot;
 
 public class AcaoTeam {
-	private int        tipo;
-	private double     parametro;
-	private int        prioridade;
+	private int	tipo;
+	private double	parametro;
+	private int		prioridade;
 
 	private TeamRobot robot;   // Referncia al robot que ejecutara la accion
 
@@ -55,8 +55,6 @@ public class AcaoTeam {
 		this.prioridade = prioridade;
 	}
 
-
-
 	public void iniciarExecucao() {
 		if (this.robot != null) {
 			switch (this.tipo) {
@@ -73,8 +71,10 @@ public class AcaoTeam {
 			case AcaoTeam.SEND_MESSAGE: 
 				try {
 					robot.broadcastMessage(parametro);
+					DEBUG.mensagem("Mensagem enviada com sucesso.");
 				} catch (IOException e) {
-					e.printStackTrace();
+					DEBUG.mensagem("ERROR ao enviar mensagem...\n"+e.getMessage()+"\n");
+					//e.printStackTrace();
 				}
 
 				break;
@@ -99,6 +99,7 @@ public class AcaoTeam {
 		case AcaoTeam.GIRAR_RADAR_ESQ: etqTipo="Girar radar esquerda"; break;
 		case AcaoTeam.GIRAR_TANQUE_DIR: etqTipo="Girar tanque direita"; break;
 		case AcaoTeam.GIRAR_TANQUE_ESQ: etqTipo="Girar tanque esquerda"; break;
+		case AcaoTeam.SEND_MESSAGE: etqTipo="Enviando mensagem"; break;
 		}
 		return "AcaoTeam[tipo:"+etqTipo+", param:"+parametro+", prioridade:"+prioridade+"]";
 	}

@@ -16,6 +16,13 @@ declare Vitima
    distancia: double
 end
 
+rule "Messagem Recebida --> Droid"
+	when
+		$messageEvent: MessageEvent()
+	then
+		System.out.println("Droid Mensagem Recebida =" + $messageEvent.getMessage() + " | " + $messageEvent.getSender());
+end
+
 rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 	when
 		$acao1: AcaoTeam($tipo: tipo, $prioridade1: prioridade)
@@ -24,13 +31,6 @@ rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 	then
 		retract($acao2);     // Elimina la acao menos prioritaria 
 		System.out.println("Depurar Acoes");
-end
-
-rule "Messagem Recebida --> Droid"
-	when
-		$messageEvent: MessageEvent()
-	then
-		System.out.println("Droid Mensagem Recebida =" + $messageEvent.getMessage() + " | " + $messageEvent.getSender());
 end
 
 rule "Bateu em outro robo --> Retrocede 200 pixels"

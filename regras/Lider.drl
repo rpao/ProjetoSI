@@ -16,13 +16,6 @@ declare Vitima
 	distancia: double
 end
 
-rule "Morri"
-	when
-		RobotDeathEvent()
-	then
-		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, 5000, 6));
-end
-
 rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 when
 	$acao1: AcaoTeam($tipo: tipo, $prioridade1: prioridade)
@@ -33,13 +26,37 @@ then
     System.out.println("Depurar Acoes");
 end
 
+rule "Se não existem robos próximos --> Girar o radar"
+when
+	not (exists ScannedRobotEvent())
+	not (exists Vitima())
+	$batalha: EstadoBatalha()
+then
+	insert (new AcaoTeam(AcaoTeam.GIRAR_RADAR_DIR, 360, 3));
+	$batalha.cleanRoboEscaneado();
+	System.out.println("Girar Radar");
+	
+end
+
+rule "Morri"
+	when
+		RobotDeathEvent()
+	then
+		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, 5000, 6));
+end
+
 rule "Inimigo Novo Escaneado --> Adiciona robo a lista de robos"
 	when
-		$roboEscaneado: ScannedRobotEvent()
+		$roboEscaneado: ScannedRobotEvent($nomeAlvo: name)
 		$batalha: EstadoBatalha()
+		eval (Util.NotFromTeam($nomeAlvo))
 	then
 		$batalha.addRoboEscaneado($roboEscaneado);
 		System.out.println("Inimigo Novo Escaneado");
+
+		double mensagem = 5000;
+		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, mensagem, 6));
+		System.out.println("Enviando mensagem: " + mensagem);
 end
 
 rule "Bateu em outro robo --> Retrocede 200 pixels"
@@ -75,18 +92,6 @@ rule "[Stop And Go Movement] Se está parado e inimigo atirou --> Avançar"
 		System.out.println("STOP AND GO");
 end
 
-rule "Se não existem robos próximos --> Girar o radar"
-when
-	not (exists ScannedRobotEvent())
-	not (exists Vitima())
-	$batalha: EstadoBatalha()
-then
-	insert (new AcaoTeam(AcaoTeam.GIRAR_RADAR_DIR, 360, 3));
-	$batalha.cleanRoboEscaneado();
-	System.out.println("Girar Radar");
-	
-end
-
 rule "Parado --> Movimento Aleatório"
 when
   EstadoRobot( distanceRemaining == 0 )
@@ -105,7 +110,8 @@ end
 rule "DISPARAR"
    when
 		$status : EstadoRobot()
-		$alvoEscaneado: ScannedRobotEvent(distance <= 200)
+		$alvoEscaneado: ScannedRobotEvent($nomeAlvo: name, distance <= 200)
+		eval (Util.NotFromTeam($nomeAlvo))
    then	
 		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
 		insert(new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
@@ -121,7 +127,8 @@ rule "DISPARAR com inimigo unico"
    when
 		$status : EstadoRobot()
 		EstadoBatalha(numeroEnimigos <= 2)
-		$alvoEscaneado: ScannedRobotEvent()
+		$alvoEscaneado: ScannedRobotEvent($nomeAlvo: name)
+		eval (Util.NotFromTeam($nomeAlvo))
    then	
 		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
 		insert(new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
