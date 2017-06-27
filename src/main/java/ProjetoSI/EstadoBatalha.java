@@ -75,7 +75,7 @@ public class EstadoBatalha {
 	public void addRoboEscaneado(ScannedRobotEvent e){
 		if (e.getDistance() <= 40)	{
 			robosEscaneados.add(e); 	
-			DEBUG.mensagem("ROBO ADICIONADO" + e.getName());
+			DEBUG.mensagem("ROBO ADICIONADO: " + e.getName());
 		}
 		/*
 		robosEscaneados.sort(new Comparator<ScannedRobotEvent>() {
@@ -84,11 +84,11 @@ public class EstadoBatalha {
 				return Double.compare(o1.getEnergy(), o2.getEnergy());
 			}
 		});
-		*/
+		 */
 	}
 
 	public boolean hasRobotEscaneado(ScannedRobotEvent e){
-		DEBUG.mensagem("Já CONTEM ROBO" + e.getName());
+		DEBUG.mensagem("Já CONTEM ROBO: " + e.getName());
 		return robosEscaneados.contains(e);
 
 	}
@@ -101,7 +101,7 @@ public class EstadoBatalha {
 				return Double.compare(o1.getEnergy(), o2.getEnergy());
 			}
 		});
-		*/
+		 */
 		return robosEscaneados.get(0);
 
 
@@ -125,6 +125,5 @@ public class EstadoBatalha {
 	public void cleanRoboEscaneado(){
 		DEBUG.mensagem("Limpou Robos");
 		robosEscaneados.clear();
-
 	}
 }

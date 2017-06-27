@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import robocode.MessageEvent;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
 
@@ -14,6 +15,12 @@ public class Util {
 			return false;
 		
 		return true;
+	}
+	
+	public static AcaoTeam recuperarAcao(MessageEvent e){
+		if (e.getMessage() instanceof AcaoTeam)
+			return (AcaoTeam)e.getMessage();
+		return null;
 	}
 	
 	public static double anguloAbsoluto(double anguloBase, double anguloRelativo) {

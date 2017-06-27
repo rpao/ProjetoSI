@@ -3,10 +3,11 @@ package ProjetoSI;
 import java.io.IOException;
 import robocode.TeamRobot;
 
-public class AcaoTeam {
-	private int	tipo;
+public class AcaoTeam implements java.io.Serializable{
+	private int		tipo;
 	private double	parametro;
 	private int		prioridade;
+	private AcaoTeam acao;
 
 	private TeamRobot robot;   // Referncia al robot que ejecutara la accion
 
@@ -24,11 +25,19 @@ public class AcaoTeam {
 
 	public AcaoTeam() {
 	}
-
-	public AcaoTeam(int tipo, double parametro, int prioridad) {
+	
+	public AcaoTeam(int tipo, AcaoTeam acao, int prioridade) {
+		this.tipo = tipo;
+		this.parametro = 0;
+		this.prioridade = prioridade;
+		this.acao = acao;
+	}
+	
+	public AcaoTeam(int tipo, double parametro, int prioridade) {
 		this.tipo = tipo;
 		this.parametro = parametro;
-		this.prioridade = prioridad;
+		this.prioridade = prioridade;
+		this.acao = null;
 	}
 
 	public double getParametro() {
@@ -70,11 +79,9 @@ public class AcaoTeam {
 			case AcaoTeam.GIRAR_TANQUE_ESQ: robot.setTurnLeft(parametro); break;
 			case AcaoTeam.SEND_MESSAGE: 
 				try {
-					robot.broadcastMessage(parametro);
-					DEBUG.mensagem("Mensagem enviada com sucesso.");
+					robot.broadcastMessage(acao);
 				} catch (IOException e) {
-					DEBUG.mensagem("ERROR ao enviar mensagem...\n"+e.getMessage()+"\n");
-					//e.printStackTrace();
+					DEBUG.mensagem("Erro ao enviar mensagem...\n"+e.getMessage()+"\n");
 				}
 
 				break;
