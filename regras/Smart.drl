@@ -1,0 +1,119 @@
+package ProjetoSI
+
+import ProjetoSI.*;
+import robocode.*;
+import robocode.ScannedRobotEvent;
+
+// Consultar ações na lista de ações
+query "consulta_acoes"
+	acao: Acao()
+end
+
+rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
+	when
+		$acao1: Acao($tipo: tipo, $prioridade1: prioridade)
+		$acao2: Acao(tipo==$tipo, $prioridade2: prioridade)
+		eval ($prioridade1 > $prioridade2)
+	then
+		retract($acao2);     // Elimina la acao menos prioritaria 
+		System.out.println("Depurar Acoes");
+end
+
+rule "Se não existem robos próximos --> Girar o radar"
+	when
+		not (exists ScannedRobotEvent())
+		$batalha: EstadoBatalha()
+	then
+		insert (new Acao(Acao.GIRAR_RADAR_DIR, 360, 3));
+		$batalha.cleanRoboEscaneado();
+		System.out.println("Girar Radar");
+end
+
+rule "Inimigo Novo Escaneado --> Adiciona robo a lista de robos"
+	when
+		$status: EstadoRobot()
+		$roboEscaneado: ScannedRobotEvent($nomeAlvo: name)
+		$batalha: EstadoBatalha()
+		eval (Util.NotFromTeam($nomeAlvo))
+	then
+		$batalha.addRoboEscaneado($roboEscaneado);
+		System.out.println("Inimigo Novo Escaneado");
+end
+
+rule "Bateu em outro robo --> Retrocede 200 pixels"
+	when
+		HitRobotEvent($nome: name, $anguloRelativo: bearing)
+	then
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, (- $anguloRelativo), 6));
+		insert(new Acao(Acao.RETROCEDER, 200, 5));
+		System.out.println("Choque Com outro Robo");
+end
+
+rule "Bateu no muro --> Retrocede 200 pixels"
+	when
+		HitWallEvent($anguloRelativo: bearing)
+	then
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, (- $anguloRelativo), 6));
+		insert(new Acao(Acao.AVANCAR, 200, 5));
+		System.out.println("Choque Com Muro");
+	end
+
+rule "[Stop And Go Movement] Se está parado e inimigo atirou --> Avançar"
+	when
+		$roboEscaneado: ScannedRobotEvent()
+		$batalha: EstadoBatalha()
+		eval($batalha.hasRobotEscaneado($roboEscaneado))
+		EstadoRobot (distanceRemaining == 0)
+		eval($batalha.getRoboInimigo($roboEscaneado).getEnergy() > $roboEscaneado.getEnergy());
+	then
+		double avance = Util.movementStopAndGo($batalha.getRoboInimigo($roboEscaneado).getEnergy() - $roboEscaneado.getEnergy());
+		insert(new Acao(Acao.AVANCAR, avance, 4));
+		System.out.println("STOP AND GO");
+end
+
+rule "Parado --> Movimento Aleatório"
+	when
+		EstadoRobot( distanceRemaining == 0 )
+		$batalha: EstadoBatalha()
+		not (exists(HitRobotEvent()))
+		not (exists(HitWallEvent()))
+	then
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 2));
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, (360*Math.random() - 180), 2));
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, (360*Math.random() - 180), 2));
+		double avance = Math.min($batalha.getLarguraCampo(), $batalha.getAlturaCampo())*Math.random();
+		insert(new Acao(Acao.AVANCAR, avance, 2));
+		System.out.println("Movimento Aleatorio");
+end
+
+rule "DISPARAR"
+   when
+		$status : EstadoRobot()
+		$alvoEscaneado: ScannedRobotEvent($nomeAlvo: name, distance <= 200)
+		eval (Util.NotFromTeam($nomeAlvo))
+   then	
+		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
+		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
+		System.out.println("> Mirar...");
+		insert (new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
+		System.out.println("> Disparar...");
+end
+
+rule "DISPARAR com inimigo unico"
+   when
+		$status : EstadoRobot()
+		EstadoBatalha(numeroEnimigos <= 2)
+		$alvoEscaneado: ScannedRobotEvent($nomeAlvo: name)
+		eval (Util.NotFromTeam($nomeAlvo))
+   then	
+		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
+		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
+		System.out.println("> Mirar...");
+		
+		insert(new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
+		System.out.println("> Disparar Contra ");
+end
