@@ -54,18 +54,20 @@ rule "ATINGIDO"
 	when
 		$status : EstadoRobot()
 		not (exists HitWallEvent())
+		not (exists HitRobotEvent())
 		HitByBulletEvent()
 	then
-		insert(new Acao(Acao.GIRAR_TANQUE_DIR, -$status.getHeading(),  5));
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, $status.getHeading()+90,  5));
 		insert(new Acao(Acao.RETROCEDER, 100, 1));
 		System.out.println ("> Atingido > Retroceder...");
 end
 
 // Choque com muro, girar o tanque em 90 graus
 rule "CHOQUE COM MURO"
-when
-   HitWallEvent() || HitRobotEvent()
-then
-   insert(new Acao(Acao.GIRAR_TANQUE_DIR, 90, 5));
-   System.out.println ("> Choque > Mudar trajetória...");
+	when
+		$status : EstadoRobot()
+		HitWallEvent() || HitRobotEvent()
+	then
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, $status.getHeading()+90, 5));
+		System.out.println ("> Choque > Mudar trajetória...");
 end

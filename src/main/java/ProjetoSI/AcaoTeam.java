@@ -1,13 +1,15 @@
 package ProjetoSI;
 
 import java.io.IOException;
+
+import robocode.ScannedRobotEvent;
 import robocode.TeamRobot;
 
-public class AcaoTeam implements java.io.Serializable{
+public class AcaoTeam{
 	private int		tipo;
 	private double	parametro;
 	private int		prioridade;
-	private AcaoTeam acao;
+	private Coordenada coordenadaInimigo;
 
 	private TeamRobot robot;   // Referncia al robot que ejecutara la accion
 
@@ -26,18 +28,18 @@ public class AcaoTeam implements java.io.Serializable{
 	public AcaoTeam() {
 	}
 	
-	public AcaoTeam(int tipo, AcaoTeam acao, int prioridade) {
+	public AcaoTeam(int tipo, Coordenada coordenadaInimigo, int prioridade) {
 		this.tipo = tipo;
 		this.parametro = 0;
 		this.prioridade = prioridade;
-		this.acao = acao;
+		this.coordenadaInimigo = coordenadaInimigo;
 	}
 	
 	public AcaoTeam(int tipo, double parametro, int prioridade) {
 		this.tipo = tipo;
 		this.parametro = parametro;
 		this.prioridade = prioridade;
-		this.acao = null;
+		this.coordenadaInimigo = null;
 	}
 
 	public double getParametro() {
@@ -79,7 +81,7 @@ public class AcaoTeam implements java.io.Serializable{
 			case AcaoTeam.GIRAR_TANQUE_ESQ: robot.setTurnLeft(parametro); break;
 			case AcaoTeam.SEND_MESSAGE: 
 				try {
-					robot.broadcastMessage(acao);
+					robot.broadcastMessage(coordenadaInimigo);
 				} catch (IOException e) {
 					DEBUG.mensagem("Erro ao enviar mensagem...\n"+e.getMessage()+"\n");
 				}

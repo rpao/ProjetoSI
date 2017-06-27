@@ -28,11 +28,14 @@ end
 
 rule "Messagem Recebida"
 	when
+		$status: EstadoRobot()
 		$messageEvent: MessageEvent()
 	then
-		System.out.println("NOME DA REGRA: "+drools.getRule().getName());
-		System.out.println("Droid Mensagem Recebida =" + $messageEvent.getMessage() + " | " + $messageEvent.getSender());
-		insert(Util.recuperarAcao($messageEvent));
+		double angulo = Util.recuperarCoordenada($status, $messageEvent);
+		System.out.println("Droid Mensagem Recebida = "+angulo);
+		insert(new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, angulo, 5));
+		insert (new AcaoTeam(AcaoTeam.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
+		System.out.println("> Disparar...");
 end
 
 /*

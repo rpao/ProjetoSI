@@ -1,28 +1,54 @@
 package ProjetoSI;
 
-import java.awt.Rectangle;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Comparator;
-
 import robocode.MessageEvent;
 import robocode.ScannedRobotEvent;
-import robocode.util.Utils;
+import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 public class Util {
 	public static boolean NotFromTeam(String name) {
 		if (name.contains("ProjetoSI") == true)
 			return false;
-		
+
 		return true;
 	}
-	
-	public static AcaoTeam recuperarAcao(MessageEvent e){
-		if (e.getMessage() instanceof AcaoTeam)
-			return (AcaoTeam)e.getMessage();
-		return null;
+
+	public static Coordenada gerarCoordenada(EstadoRobot r, ScannedRobotEvent e){
+		// Calculate enemy bearing
+		double enemyBearing = r.getHeading() + e.getBearing();
+		// Calculate enemy's position
+		double X = r.getX() + e.getDistance() * Math.sin(Math.toRadians(enemyBearing));
+		double Y = r.getY() + e.getDistance() * Math.cos(Math.toRadians(enemyBearing));
+		
+		return new Coordenada(X, Y);
 	}
-	
+
+	public static double recuperarCoordenada(EstadoRobot r, MessageEvent e) {
+		// Fire at a point
+		if (e.getMessage() instanceof Coordenada) {
+			Coordenada p = (Coordenada) e.getMessage();
+			// Calculate x and y to target
+			double dx = p.getX() - r.getX();
+			double dy = p.getY() - r.getY();
+			
+			// Calculate angle to target
+			double theta = Math.toDegrees(Math.atan2(dx, dy));
+			return normalRelativeAngleDegrees(theta - r.getGunHeading());
+		}
+		return 0;
+	}
+		
+	public static double recuperarCoordenadaX(MessageEvent e){
+		if (e.getMessage() instanceof Coordenada)
+			return ((Coordenada)e.getMessage()).getX();
+		return 0;
+	}
+
+	public static double recuperarCoordenadaY(MessageEvent e){
+		if (e.getMessage() instanceof Coordenada)
+			return ((Coordenada)e.getMessage()).getY();
+		return 0;
+	}
+
 	public static double anguloAbsoluto(double anguloBase, double anguloRelativo) {
 		double angulo = (anguloBase + anguloRelativo) % 360;
 
@@ -67,23 +93,23 @@ public class Util {
 
 		return Math.sqrt(offsetX*offsetX + offsetY*offsetY);
 	}
-	
+
 	/** Movimento Stop And Go **/
-    public static double movementStopAndGo(double energyDrop){
-    	return ((3 + (int)(energyDrop*1.999999)) << 3 );
-    }
-    
-    /** Robo de Menor Energia ** /
+	public static double movementStopAndGo(double energyDrop){
+		return ((3 + (int)(energyDrop*1.999999)) << 3 );
+	}
+
+	/** Robo de Menor Energia ** /
     public static ScannedRobotEvent getLesserLifeRobot(ArrayList<ScannedRobotEvent> robosEscaneados){
-    	
+
     	robosEscaneados.sort(new Comparator<ScannedRobotEvent>() {
 			@Override
 			public int compare(ScannedRobotEvent o1, ScannedRobotEvent o2) {
 				return Double.compare(o1.getEnergy(), o2.getEnergy());
 			}
 		});
-    	
+
     	return robosEscaneados.get(0);
     }
-    */
+	 */
 }

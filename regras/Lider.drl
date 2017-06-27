@@ -46,22 +46,16 @@ end
 
 rule "Inimigo Novo Escaneado --> Adiciona robo a lista de robos"
 	when
+		$status: EstadoRobot()
 		$roboEscaneado: ScannedRobotEvent($nomeAlvo: name)
 		$batalha: EstadoBatalha()
 		eval (Util.NotFromTeam($nomeAlvo))
 	then
 		$batalha.addRoboEscaneado($roboEscaneado);
 		System.out.println("Inimigo Novo Escaneado");
-		/*
-		AcaoTeam mensagem = new AcaoTeam(AcaoTeam.DISPARAR, 3, 5);
-		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, mensagem, 6));
-		System.out.println("Enviando mensagem: " + mensagem);
 		
-		AcaoTeam acao1 = new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, 90, 5);
-		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, acao1, 6));
-		System.out.println("> Enviando mensagem: " + acao1);
-		insert(new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, 90, 5));
-		*/
+		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, Util.gerarCoordenada($status, $roboEscaneado), 6));
+		System.out.println("Enviando mensagem: " + $roboEscaneado);
 end
 
 rule "Bateu em outro robo --> Retrocede 200 pixels"
@@ -118,24 +112,11 @@ rule "DISPARAR"
    then	
 		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
 		insert(new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
-
-		AcaoTeam acao1 = new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5);
-		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, acao1, 6));
-		System.out.println("> Enviando mensagem: " + acao1);
-		
 		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
 		insert(new AcaoTeam(AcaoTeam.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
 		System.out.println("> Mirar...");
-		
-		AcaoTeam acao2 = new AcaoTeam(AcaoTeam.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5);
-		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, acao2, 6));
-		System.out.println("> Enviando mensagem: " + acao2);
-		
 		insert (new AcaoTeam(AcaoTeam.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
 		System.out.println("> Disparar...");
-		
-		AcaoTeam acao3 = new AcaoTeam(AcaoTeam.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5);
-		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, acao3, 6));
 end
 
 rule "DISPARAR com inimigo unico"

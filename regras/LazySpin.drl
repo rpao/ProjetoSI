@@ -31,9 +31,9 @@ end
 rule "CHOQUE COM MURO"
 	when
 		$status : EstadoRobot()		
-		HitWallEvent($anguloRelativo: bearing) //|| HitRobotEvent($anguloRelativo: bearing)
+		HitWallEvent($anguloRelativo: bearing)
 	then
-		insert(new Acao(Acao.GIRAR_TANQUE_DIR, $anguloRelativo, 2));
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, $anguloRelativo+90, 2));
 		insert(new Acao(Acao.RETROCEDER, 300, 2));
 		System.out.println("> Choque...");
 end
