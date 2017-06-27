@@ -27,14 +27,14 @@ public class AcaoTeam{
 
 	public AcaoTeam() {
 	}
-	
+
 	public AcaoTeam(int tipo, Coordenada coordenadaInimigo, int prioridade) {
 		this.tipo = tipo;
 		this.parametro = 0;
 		this.prioridade = prioridade;
 		this.coordenadaInimigo = coordenadaInimigo;
 	}
-	
+
 	public AcaoTeam(int tipo, double parametro, int prioridade) {
 		this.tipo = tipo;
 		this.parametro = parametro;

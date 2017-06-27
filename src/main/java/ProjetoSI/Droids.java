@@ -1,5 +1,6 @@
 package ProjetoSI;
 
+import java.awt.Color;
 import java.util.Vector;
 
 import org.drools.KnowledgeBase;
@@ -38,6 +39,12 @@ public class Droids extends TeamRobot implements Droid{
 
 	@Override
 	public void run() {
+		// Set colors
+		setBodyColor(Color.BLACK);
+		setGunColor(Color.BLACK);
+		setRadarColor(Color.BLACK);
+		setScanColor(Color.BLACK);
+
 		DEBUG.habilitarModoDebug(System.getProperty("robot.debug", "true").equals("true"));    	
 
 		criarBC();

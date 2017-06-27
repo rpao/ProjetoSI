@@ -39,7 +39,7 @@ public class EstadoRobot {
 		x = robot.getX();
 		y = robot.getY();
 	}
-	
+
 	public EstadoRobot(TeamRobot robot){
 		distanceRemaining = robot.getDistanceRemaining();
 		energy = robot.getEnergy();

@@ -90,7 +90,7 @@ public class VerificarRegras {
 		}		
 		return listaAcoes;
 	}
-	
+
 	private List<AcaoTeam> recuperarAcoesTeam() {
 		AcaoTeam acao;
 		Vector<AcaoTeam> listaAcoes = new Vector<AcaoTeam>();

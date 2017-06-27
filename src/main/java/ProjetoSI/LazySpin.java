@@ -143,7 +143,7 @@ public class LazySpin extends AdvancedRobot {
 			Acao.iniciarExecucao();
 		}
 	}
- 
+
 	@Override
 	public void onBulletHit(BulletHitEvent event) {
 		refFatosAtuais.add(ksession.insert(event));

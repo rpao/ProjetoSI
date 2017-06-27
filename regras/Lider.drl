@@ -9,11 +9,11 @@ query "consulta_acoes"
 	acao: AcaoTeam()
 end
 
-declare Vitima
-	nome: String
-	x: double
-	y: double
-	distancia: double
+rule "Morri"
+	when
+		DeathEvent()
+	then
+		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, 9999, 6));
 end
 
 rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
@@ -29,19 +29,11 @@ end
 rule "Se não existem robos próximos --> Girar o radar"
 	when
 		not (exists ScannedRobotEvent())
-		not (exists Vitima())
 		$batalha: EstadoBatalha()
 	then
 		insert (new AcaoTeam(AcaoTeam.GIRAR_RADAR_DIR, 360, 3));
 		$batalha.cleanRoboEscaneado();
 		System.out.println("Girar Radar");
-end
-
-rule "Morri"
-	when
-		RobotDeathEvent()
-	then
-		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, 5000, 6));
 end
 
 rule "Inimigo Novo Escaneado --> Adiciona robo a lista de robos"

@@ -3,12 +3,12 @@ package ProjetoSI;
 public class Coordenada implements java.io.Serializable{
 	double X;
 	double Y;
-	
+
 	public Coordenada (double X, double Y){
 		this.X = X;
 		this.Y = Y;
 	}
-	
+
 	public double getX() {
 		return X;
 	}

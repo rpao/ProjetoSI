@@ -27,7 +27,7 @@ import org.drools.runtime.rule.QueryResultsRow;
 public class Lazy extends AdvancedRobot {
 	public static String REGRAS = "ProjetoSI/regras/Lazy.drl";
 	public static String CONSULTA_ACOES = "consulta_acoes";
-	
+
 	private double posicao;	
 	private KnowledgeBuilder kbuilder;
 	private KnowledgeBase kbase;
@@ -48,12 +48,12 @@ public class Lazy extends AdvancedRobot {
 
 		// Criar base de conhecimentos e carregar regras
 		criarBC();
-		
+
 		// Tornar os movimentos independentes (tanque, cano e radar)
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
-		
+
 		while (true) {	
 			DEBUG.mensagem("inicio turno");
 			carregarEstadoRobot();
@@ -73,7 +73,7 @@ public class Lazy extends AdvancedRobot {
 					acoes.remove(i);
 				}
 			}
-			
+
 			DEBUG.mensagem("acoes resultantes");
 			DEBUG.despejarAcoes(acoes);
 

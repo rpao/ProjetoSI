@@ -18,7 +18,7 @@ public class Util {
 		// Calculate enemy's position
 		double X = r.getX() + e.getDistance() * Math.sin(Math.toRadians(enemyBearing));
 		double Y = r.getY() + e.getDistance() * Math.cos(Math.toRadians(enemyBearing));
-		
+
 		return new Coordenada(X, Y);
 	}
 
@@ -29,14 +29,14 @@ public class Util {
 			// Calculate x and y to target
 			double dx = p.getX() - r.getX();
 			double dy = p.getY() - r.getY();
-			
+
 			// Calculate angle to target
 			double theta = Math.toDegrees(Math.atan2(dx, dy));
 			return normalRelativeAngleDegrees(theta - r.getGunHeading());
 		}
 		return 0;
 	}
-		
+
 	public static double recuperarCoordenadaX(MessageEvent e){
 		if (e.getMessage() instanceof Coordenada)
 			return ((Coordenada)e.getMessage()).getX();

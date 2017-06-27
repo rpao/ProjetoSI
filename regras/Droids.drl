@@ -9,13 +9,6 @@ query "consulta_acoes"
 	acao: AcaoTeam()
 end
 
-declare Vitima
-   nome: String
-   x: double
-   y: double
-   distancia: double
-end
-
 rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 	when
 		$acao1: AcaoTeam($tipo: tipo, $prioridade1: prioridade)
@@ -38,7 +31,6 @@ rule "Messagem Recebida"
 		System.out.println("> Disparar...");
 end
 
-/*
 rule "Bateu em outro robo --> Retrocede 200 pixels"
 	when
 		HitRobotEvent($nome: name, $anguloRelativo: bearing)
@@ -69,5 +61,30 @@ rule "Parado --> Movimento Aleatório"
 		double avance = Math.min($batalha.getLarguraCampo(), $batalha.getAlturaCampo())*Math.random();
 		insert(new AcaoTeam(AcaoTeam.AVANCAR, avance, 2));
 		System.out.println("Movimento Aleatorio");
+end
+/*
+rule "Atirar Aleatoriamente"
+	when 
+		EstadoRobot($heading: heading, $gunHeading: gunHeading)
+		//exists(StatusRobot())
+	then
+	
+		double targetAngle = $heading - (360 * Math.random())%360;
+		double bulletPower = Math.max(0.1, Math.random() * 3.0);
+		double escapeAngle = Math.asin(8/ Rules.getBulletSpeed(bulletPower));
+		double randomAimOffset = -escapeAngle + Math.random() * 2 * escapeAngle;
+		double headOnTargeting = targetAngle - $gunHeading;
+		
+		insert(new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, headOnTargeting + randomAimOffset, 1));
+		insert(new AcaoTeam(AcaoTeam.DISPARAR, bulletPower, 1));
+end
+
+rule "Quando o Lider Morrer"
+	when
+		$messageEvent: MessageEvent()
+		eval($messageEvent.getMessage() == 9999)
+	then
+	`	StatusRobot statusRobot = new StatusRobot()
+		statusRobot.setIsDead(true)
 end
 */
