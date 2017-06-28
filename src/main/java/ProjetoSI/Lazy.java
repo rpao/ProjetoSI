@@ -9,7 +9,6 @@ import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
-import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 import java.awt.*;
 import java.util.Vector;
@@ -28,7 +27,6 @@ public class Lazy extends AdvancedRobot {
 	public static String REGRAS = "ProjetoSI/regras/Lazy.drl";
 	public static String CONSULTA_ACOES = "consulta_acoes";
 
-	private double posicao;	
 	private KnowledgeBuilder kbuilder;
 	private KnowledgeBase kbase;
 	private StatefulKnowledgeSession ksession;

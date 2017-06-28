@@ -56,17 +56,15 @@ public class Droids extends TeamRobot implements Droid{
 
 		while (true) {
 			DEBUG.mensagem("inicio do turno");
-			//cargarEventos();  // se hace en los metodos onXXXXXEvent()
 			cargarEstadoRobot();
 			cargarEstadoBatalha();
 
-			// Lanzar reglas
 			DEBUG.mensagem("acoes em memoria ativa");
 			DEBUG.despejarAcoes(ksession);           
 			ksession.fireAllRules();
 			limparAcoesAntigas();
 
-			Vector<AcaoTeam> acoes = recuperarAcaoTeames();
+			Vector<AcaoTeam> acoes = recuperarAcoesTeam();
 			DEBUG.mensagem("acoes resultantes");
 			DEBUG.despejarAcoesTeam(acoes);
 
@@ -76,7 +74,6 @@ public class Droids extends TeamRobot implements Droid{
 		}
 
 	}
-
 
 	private void criarBC() {
 		String ficheroRegras = System.getProperty("robot.regras", Droids.REGRAS);
@@ -96,8 +93,6 @@ public class Droids extends TeamRobot implements Droid{
 		DEBUG.mensagem("criar secao de memoria ativa");
 		ksession = kbase.newStatefulKnowledgeSession();
 	}
-
-
 
 	private void cargarEstadoRobot() {
 		EstadoRobot estadoRobot = new EstadoRobot(this);
@@ -120,7 +115,7 @@ public class Droids extends TeamRobot implements Droid{
 		this.refAcoesAtuais.clear();
 	}
 
-	private Vector<AcaoTeam> recuperarAcaoTeames() {
+	private Vector<AcaoTeam> recuperarAcoesTeam() {
 		AcaoTeam acao;
 		Vector<AcaoTeam> listaAcoes = new Vector<AcaoTeam>();
 

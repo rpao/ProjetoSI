@@ -11,7 +11,7 @@ public class AcaoTeam{
 	private int		prioridade;
 	private Coordenada coordenadaInimigo;
 
-	private TeamRobot robot;   // Referncia al robot que ejecutara la accion
+	private TeamRobot robot;
 
 	public static final int AVANCAR=1;
 	public static final int RETROCEDER=2;
@@ -66,6 +66,14 @@ public class AcaoTeam{
 		this.prioridade = prioridade;
 	}
 
+	public Coordenada getCoordenadaInimigo() {
+		return coordenadaInimigo;
+	}
+
+	public void setCoordenadaInimigo(Coordenada coordenadaInimigo) {
+		this.coordenadaInimigo = coordenadaInimigo;
+	}
+
 	public void iniciarExecucao() {
 		if (this.robot != null) {
 			switch (this.tipo) {
@@ -79,7 +87,7 @@ public class AcaoTeam{
 			case AcaoTeam.GIRAR_RADAR_ESQ: robot.setTurnRadarLeft(parametro); break;
 			case AcaoTeam.GIRAR_TANQUE_DIR: robot.setTurnRight(parametro); break;
 			case AcaoTeam.GIRAR_TANQUE_ESQ: robot.setTurnLeft(parametro); break;
-			case AcaoTeam.SEND_MESSAGE: 
+			case AcaoTeam.SEND_MESSAGE:
 				try {
 					robot.broadcastMessage(coordenadaInimigo);
 				} catch (IOException e) {
@@ -112,5 +120,4 @@ public class AcaoTeam{
 		}
 		return "AcaoTeam[tipo:"+etqTipo+", param:"+parametro+", prioridade:"+prioridade+"]";
 	}
-
 }

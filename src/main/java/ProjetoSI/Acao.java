@@ -108,6 +108,6 @@ public class Acao {
 	public void goCircle(double parametro){
 		robot.setTurnRight(1000);
 		robot.setMaxVelocity(5);
-		robot.setBack(parametro);//robot.ahead(parametro);
+		robot.setBack(parametro);
 	}
 }

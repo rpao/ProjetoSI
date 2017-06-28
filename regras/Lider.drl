@@ -9,13 +9,6 @@ query "consulta_acoes"
 	acao: AcaoTeam()
 end
 
-rule "Morri"
-	when
-		DeathEvent()
-	then
-		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, 9999, 6));
-end
-
 rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 	when
 		$acao1: AcaoTeam($tipo: tipo, $prioridade1: prioridade)
@@ -108,7 +101,7 @@ rule "DISPARAR"
 		insert(new AcaoTeam(AcaoTeam.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
 		System.out.println("> Mirar...");
 		insert (new AcaoTeam(AcaoTeam.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
-		System.out.println("> Disparar...");
+		System.out.println("> Disparar Contra "+$nomeAlvo);
 end
 
 rule "DISPARAR com inimigo unico"
@@ -125,5 +118,5 @@ rule "DISPARAR com inimigo unico"
 		System.out.println("> Mirar...");
 		
 		insert(new AcaoTeam(AcaoTeam.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
-		System.out.println("> Disparar Contra ");
+		System.out.println("> Disparar Contra "+$nomeAlvo);
 end

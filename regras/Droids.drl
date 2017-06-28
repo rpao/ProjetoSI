@@ -9,13 +9,29 @@ query "consulta_acoes"
 	acao: AcaoTeam()
 end
 
+declare StatusLider
+	isDead: boolean
+end
+
+rule "Morte de Robot --> Verificar Lider Vivo"
+	when
+		not (exists(StatusLider()))
+		$robotDeath: RobotDeathEvent()
+		eval(Util.isLeader($robotDeath))
+	then
+		System.out.println("> LIDER IS DEAD X__X");
+		StatusLider statusLider = new StatusLider();
+		statusLider.setIsDead(true);
+		insert(statusLider);
+end
+
 rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 	when
 		$acao1: AcaoTeam($tipo: tipo, $prioridade1: prioridade)
 		$acao2: AcaoTeam(tipo==$tipo, $prioridade2: prioridade)
 		eval ($prioridade1 > $prioridade2)
 	then
-		retract($acao2);     // Elimina la acao menos prioritaria 
+		retract($acao2); 
 		System.out.println("Depurar Acoes");
 end
 
@@ -25,10 +41,9 @@ rule "Messagem Recebida"
 		$messageEvent: MessageEvent()
 	then
 		double angulo = Util.recuperarCoordenada($status, $messageEvent);
-		System.out.println("Droid Mensagem Recebida = "+angulo);
 		insert(new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, angulo, 5));
 		insert (new AcaoTeam(AcaoTeam.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
-		System.out.println("> Disparar...");
+		System.out.println("Ordem do Lider -> Disparar");
 end
 
 rule "Bateu em outro robo --> Retrocede 200 pixels"
@@ -62,11 +77,11 @@ rule "Parado --> Movimento Aleatório"
 		insert(new AcaoTeam(AcaoTeam.AVANCAR, avance, 2));
 		System.out.println("Movimento Aleatorio");
 end
-/*
+
 rule "Atirar Aleatoriamente"
 	when 
 		EstadoRobot($heading: heading, $gunHeading: gunHeading)
-		//exists(StatusRobot())
+		exists(StatusLider())
 	then
 	
 		double targetAngle = $heading - (360 * Math.random())%360;
@@ -77,14 +92,5 @@ rule "Atirar Aleatoriamente"
 		
 		insert(new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, headOnTargeting + randomAimOffset, 1));
 		insert(new AcaoTeam(AcaoTeam.DISPARAR, bulletPower, 1));
+		System.out.println("Tiro Aleatorio");
 end
-
-rule "Quando o Lider Morrer"
-	when
-		$messageEvent: MessageEvent()
-		eval($messageEvent.getMessage() == 9999)
-	then
-	`	StatusRobot statusRobot = new StatusRobot()
-		statusRobot.setIsDead(true)
-end
-*/

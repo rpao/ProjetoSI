@@ -11,6 +11,7 @@ import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.FactHandle;
 import org.drools.runtime.rule.QueryResultsRow;
+
 import robocode.BulletHitBulletEvent;
 import robocode.BulletHitEvent;
 import robocode.BulletMissedEvent;
@@ -54,17 +55,15 @@ public class Lider extends TeamRobot{
 
 		while (true) {
 			DEBUG.mensagem("inicio do turno");
-			//cargarEventos();  // se hace en los metodos onXXXXXEvent()
 			cargarEstadoRobot();
 			cargarEstadoBatalha();
 
-			// Lanzar reglas
 			DEBUG.mensagem("acoes em memoria ativa");
 			DEBUG.despejarAcoes(ksession);           
 			ksession.fireAllRules();
 			limparAcoesAntigas();
 
-			Vector<AcaoTeam> acoes = recuperarAcaoTeames();
+			Vector<AcaoTeam> acoes = recuperarAcoesTeam();
 			DEBUG.mensagem("acoes resultantes");
 			DEBUG.despejarAcoesTeam(acoes);
 
@@ -74,7 +73,6 @@ public class Lider extends TeamRobot{
 		}
 
 	}
-
 
 	private void criarBC() {
 		String ficheroRegras = System.getProperty("robot.regras", Lider.REGRAS);
@@ -118,7 +116,7 @@ public class Lider extends TeamRobot{
 		this.refAcoesAtuais.clear();
 	}
 
-	private Vector<AcaoTeam> recuperarAcaoTeames() {
+	private Vector<AcaoTeam> recuperarAcoesTeam() {
 		AcaoTeam acao;
 		Vector<AcaoTeam> listaAcoes = new Vector<AcaoTeam>();
 
@@ -187,5 +185,4 @@ public class Lider extends TeamRobot{
 	public void onDeath(DeathEvent event) {
 		refAcoesAtuais.add(ksession.insert(event));
 	}
-
 }

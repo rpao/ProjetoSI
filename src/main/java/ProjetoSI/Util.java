@@ -1,6 +1,7 @@
 package ProjetoSI;
 
 import robocode.MessageEvent;
+import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 
@@ -10,6 +11,13 @@ public class Util {
 			return false;
 
 		return true;
+	}
+
+	public static boolean isLeader(RobotDeathEvent r){
+		if (r.getName().contains("ProjetoSI.Lider"))
+			return true;
+
+		return false;
 	}
 
 	public static Coordenada gerarCoordenada(EstadoRobot r, ScannedRobotEvent e){
@@ -23,18 +31,19 @@ public class Util {
 	}
 
 	public static double recuperarCoordenada(EstadoRobot r, MessageEvent e) {
-		// Fire at a point
+		double valor = 0; // verificacao de segurança
 		if (e.getMessage() instanceof Coordenada) {
 			Coordenada p = (Coordenada) e.getMessage();
-			// Calculate x and y to target
+
+			// Calcular x e y do alvo
 			double dx = p.getX() - r.getX();
 			double dy = p.getY() - r.getY();
 
-			// Calculate angle to target
+			// Calculate angulo do alvo
 			double theta = Math.toDegrees(Math.atan2(dx, dy));
-			return normalRelativeAngleDegrees(theta - r.getGunHeading());
+			valor = normalRelativeAngleDegrees(theta - r.getGunHeading());
 		}
-		return 0;
+		return valor;
 	}
 
 	public static double recuperarCoordenadaX(MessageEvent e){

@@ -77,14 +77,12 @@ public class EstadoBatalha {
 			robosEscaneados.add(e); 	
 			DEBUG.mensagem("ROBO ADICIONADO: " + e.getName());
 		}
-		/*
 		robosEscaneados.sort(new Comparator<ScannedRobotEvent>() {
 			//@Override
 			public int compare(ScannedRobotEvent o1, ScannedRobotEvent o2) {
 				return Double.compare(o1.getEnergy(), o2.getEnergy());
 			}
 		});
-		 */
 	}
 
 	public boolean hasRobotEscaneado(ScannedRobotEvent e){
@@ -94,17 +92,13 @@ public class EstadoBatalha {
 	}
 
 	public ScannedRobotEvent getLesserLifeRobot(){
-		/*
 		robosEscaneados.sort(new Comparator<ScannedRobotEvent>() {
 			//@Override
 			public int compare(ScannedRobotEvent o1, ScannedRobotEvent o2) {
 				return Double.compare(o1.getEnergy(), o2.getEnergy());
 			}
 		});
-		 */
 		return robosEscaneados.get(0);
-
-
 	}
 
 	public boolean isEmptyRoboEscaneados(){

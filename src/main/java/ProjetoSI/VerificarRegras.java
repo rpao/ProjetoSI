@@ -42,7 +42,6 @@ public class VerificarRegras {
 		ScannedRobotEvent e = new ScannedRobotEvent("pepe", 100, 10, 10, 10, 10);
 		FactHandle refFatos = ksession.insert(e);
 		refFatosAtuais.add(refFatos);
-		// anadir mas hechos ....
 
 		DEBUG.mensagem("fatos em memoria ativa");
 		DEBUG.despejarAcoes(ksession);

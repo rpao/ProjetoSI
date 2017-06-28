@@ -25,7 +25,7 @@ rule "GIRAR RADAR"
 		insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 1));
 		System.out.println("> Girar radar...");
 		insert(new Acao(Acao.MOVIMENTO_CIRCULO, 500, 1));	
-		System.out.println("> Movimentar...");
+		System.out.println("> Movimentar em circulo...");
 end
 
 rule "CHOQUE COM MURO"
