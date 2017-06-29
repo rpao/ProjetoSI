@@ -26,8 +26,6 @@ rule "GIRAR RADAR"
 		$status : EstadoRobot()
 		not (exists ScannedRobotEvent())
 	then
-		double angulo = Util.anguloRelativo($status.getHeading(), 0);
-		insert(new Acao(Acao.GIRAR_TANQUE_DIR, angulo, 1));
 		insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 5));
 		System.out.println("> Girar radar");
 end
@@ -50,25 +48,41 @@ rule "DISPARAR"
 end
 
 // Se movimentar em caso de choque
-rule "ATINGIDO"
+rule "MOVIMENTAR"
 	when
 		$status : EstadoRobot()
 		not (exists HitWallEvent())
 		not (exists HitRobotEvent())
-		HitByBulletEvent()
+		HitByBulletEvent() || eval ($status.getEnergy() <= 20)
 	then
-		insert(new Acao(Acao.GIRAR_TANQUE_DIR, $status.getHeading()+90,  5));
-		insert(new Acao(Acao.RETROCEDER, 100, 1));
-		System.out.println ("> Atingido > Retroceder...");
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, (360*Math.random() - 180),  5));
+		insert(new Acao(Acao.RETROCEDER, 500, 1));
+		System.out.println ("> Movimentar...");
 end
 
 // Choque com muro, girar o tanque em 90 graus
-rule "CHOQUE FISICO"
+rule "CHOQUE COM MURO"
 	when
 		$status : EstadoRobot()
-		HitWallEvent() || HitRobotEvent()
+		HitWallEvent()
 		not (exists HitByBulletEvent())
 	then
 		insert(new Acao(Acao.GIRAR_TANQUE_DIR, $status.getHeading()+90, 5));
+		insert(new Acao(Acao.RETROCEDER, 50, 1));
 		System.out.println ("> Choque > Mudar trajetória...");
+end
+
+// Quando ocorre um choque com outro robô que não é do time: mira e atira
+rule "CHOQUE COM ROBOT > MIRAR > ATIRAR"
+	when
+		$status : EstadoRobot()
+		HitRobotEvent($nome: name, $anguloRelativo: bearing)
+		eval (Util.NotFromTeam($nome))
+	then
+		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($anguloRelativo - anguloRelativoCano), 5));
+		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($anguloRelativo - anguloRelativoRadar), 1));		
+		insert(new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
+		System.out.println("> Choque com "+$nome+" > mirar > disparar...");
 end

@@ -9,6 +9,7 @@ query "consulta_acoes"
 	acao: Acao()
 end
 
+// Depurar ações por prioridade
 rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 	when
 		$acao1: Acao($tipo: tipo, $prioridade1: prioridade)
@@ -19,6 +20,7 @@ rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 		System.out.println("Depurar Acoes");
 end
 
+// Girar o radar para procurar alvos
 rule "Se não existem robos próximos --> Girar o radar"
 	when
 		not (exists ScannedRobotEvent())
@@ -29,6 +31,7 @@ rule "Se não existem robos próximos --> Girar o radar"
 		System.out.println("Girar Radar");
 end
 
+// Inserir inimigos na lista de alvos
 rule "Inimigo Novo Escaneado --> Adiciona robo a lista de robos"
 	when
 		$status: EstadoRobot()
@@ -40,6 +43,7 @@ rule "Inimigo Novo Escaneado --> Adiciona robo a lista de robos"
 		System.out.println("Inimigo Novo Escaneado");
 end
 
+// Choque com robô, se afastar
 rule "Bateu em outro robo --> Retrocede 200 pixels"
 	when
 		HitRobotEvent($nome: name, $anguloRelativo: bearing)
@@ -49,6 +53,7 @@ rule "Bateu em outro robo --> Retrocede 200 pixels"
 		System.out.println("Choque Com outro Robo");
 end
 
+// Tratar choque com o muro
 rule "Bateu no muro --> Retrocede 200 pixels"
 	when
 		HitWallEvent($anguloRelativo: bearing)
@@ -58,6 +63,7 @@ rule "Bateu no muro --> Retrocede 200 pixels"
 		System.out.println("Choque Com Muro");
 	end
 
+// Movimento de esquiva
 rule "[Stop And Go Movement] Se está parado e inimigo atirou --> Avançar"
 	when
 		$roboEscaneado: ScannedRobotEvent()
@@ -71,6 +77,7 @@ rule "[Stop And Go Movement] Se está parado e inimigo atirou --> Avançar"
 		System.out.println("STOP AND GO");
 end
 
+// Movimento aleatório
 rule "Parado --> Movimento Aleatório"
 	when
 		EstadoRobot( distanceRemaining == 0 )
@@ -86,6 +93,7 @@ rule "Parado --> Movimento Aleatório"
 		System.out.println("Movimento Aleatorio");
 end
 
+// Disparar contra inimigos na lista
 rule "DISPARAR"
    when
 		$status : EstadoRobot()
@@ -96,12 +104,11 @@ rule "DISPARAR"
 		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
 		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
 		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
-		System.out.println("> Mirar...");
 		insert (new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
-		System.out.println("> Disparar Contra "+$nomeAlvo);
+		System.out.println("> Mirar...\n> Disparar Contra "+$nomeAlvo);
 end
 
-rule "DISPARAR com inimigo unico"
+rule "Disparar com inimigo unico"
    when
 		$status : EstadoRobot()
 		EstadoBatalha(numeroEnimigos <= 2)
@@ -112,8 +119,6 @@ rule "DISPARAR com inimigo unico"
 		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
 		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
 		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
-		System.out.println("> Mirar...");
-		
 		insert(new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
-		System.out.println("> Disparar Contra "+$nomeAlvo);
+		System.out.println("> Mirar...\n> Disparar Contra "+$nomeAlvo);
 end

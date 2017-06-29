@@ -9,10 +9,12 @@ query "consulta_acoes"
 	acao: AcaoTeam()
 end
 
+// Ativo quando o líder morre, utilizado para ações independentes
 declare StatusLider
 	isDead: boolean
 end
 
+// Ação independente: Se algum robô morre, verifica se foi o líder
 rule "Morte de Robot --> Verificar Lider Vivo"
 	when
 		not (exists(StatusLider()))
@@ -25,6 +27,7 @@ rule "Morte de Robot --> Verificar Lider Vivo"
 		insert(statusLider);
 end
 
+// Ação independente: Depurar ações por prioridade
 rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 	when
 		$acao1: AcaoTeam($tipo: tipo, $prioridade1: prioridade)
@@ -35,6 +38,8 @@ rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 		System.out.println("Depurar Acoes");
 end
 
+// Ação independente: Tratar mensagem recebida
+// Ação dependente: realizar ação conforme mensagem recebida
 rule "Messagem Recebida"
 	when
 		$status: EstadoRobot()
@@ -46,6 +51,7 @@ rule "Messagem Recebida"
 		System.out.println("Ordem do Lider -> Disparar");
 end
 
+// Ação independente: Tratar choque com outro robô
 rule "Bateu em outro robo --> Retrocede 200 pixels"
 	when
 		HitRobotEvent($nome: name, $anguloRelativo: bearing)
@@ -55,6 +61,7 @@ rule "Bateu em outro robo --> Retrocede 200 pixels"
 		System.out.println("Choque Com outro Robo");
 end
 
+// Ação independente: Tratar choque com o muro
 rule "Bateu no muro --> Retrocede 200 pixels"
 	when
 		HitWallEvent($anguloRelativo: bearing)
@@ -64,6 +71,7 @@ rule "Bateu no muro --> Retrocede 200 pixels"
 		System.out.println("Choque Com Muro");
 end
 
+// Ação independente: Movimento aleatório
 rule "Parado --> Movimento Aleatório"
 	when
 		EstadoRobot( distanceRemaining == 0 )
@@ -78,6 +86,7 @@ rule "Parado --> Movimento Aleatório"
 		System.out.println("Movimento Aleatorio");
 end
 
+// Ação independente: Atirar aleatoriamente
 rule "Atirar Aleatoriamente"
 	when 
 		EstadoRobot($heading: heading, $gunHeading: gunHeading)
