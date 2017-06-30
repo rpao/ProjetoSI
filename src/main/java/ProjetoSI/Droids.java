@@ -56,27 +56,24 @@ public class Droids extends TeamRobot implements Droid{
 
 		while (true) {
 			DEBUG.mensagem("inicio do turno");
-			//cargarEventos();  // se hace en los metodos onXXXXXEvent()
 			cargarEstadoRobot();
 			cargarEstadoBatalha();
 
-			// Lanzar reglas
 			DEBUG.mensagem("acoes em memoria ativa");
 			DEBUG.despejarAcoes(ksession);           
 			ksession.fireAllRules();
 			limparAcoesAntigas();
 
-			Vector<AcaoTeam> acoes = recuperarAcaoTeames();
+			Vector<Acao> acoes = recuperarAcoes();
 			DEBUG.mensagem("acoes resultantes");
-			DEBUG.despejarAcoesTeam(acoes);
+			DEBUG.despejarAcoes(acoes);
 
-			executarAcoesTeam(acoes);
+			executarAcoes(acoes);
 			DEBUG.mensagem("fim do turno\n");
 			execute();
 		}
 
 	}
-
 
 	private void criarBC() {
 		String ficheroRegras = System.getProperty("robot.regras", Droids.REGRAS);
@@ -96,8 +93,6 @@ public class Droids extends TeamRobot implements Droid{
 		DEBUG.mensagem("criar secao de memoria ativa");
 		ksession = kbase.newStatefulKnowledgeSession();
 	}
-
-
 
 	private void cargarEstadoRobot() {
 		EstadoRobot estadoRobot = new EstadoRobot(this);
@@ -120,12 +115,12 @@ public class Droids extends TeamRobot implements Droid{
 		this.refAcoesAtuais.clear();
 	}
 
-	private Vector<AcaoTeam> recuperarAcaoTeames() {
-		AcaoTeam acao;
-		Vector<AcaoTeam> listaAcoes = new Vector<AcaoTeam>();
+	private Vector<Acao> recuperarAcoes() {
+		Acao acao;
+		Vector<Acao> listaAcoes = new Vector<Acao>();
 
 		for (QueryResultsRow resultado : ksession.getQueryResults(Droids.CONSULTA_ACOES)) {
-			acao = (AcaoTeam) resultado.get("acao");
+			acao = (Acao) resultado.get("acao");
 			acao.setRobot(this);
 			listaAcoes.add(acao);
 			ksession.retract(resultado.getFactHandle("acao"));
@@ -134,8 +129,8 @@ public class Droids extends TeamRobot implements Droid{
 		return listaAcoes;
 	}
 
-	private void executarAcoesTeam(Vector<AcaoTeam> acoes) {
-		for (AcaoTeam acao : acoes) {
+	private void executarAcoes(Vector<Acao> acoes) {
+		for (Acao acao : acoes) {
 			acao.iniciarExecucao();
 		}
 	}

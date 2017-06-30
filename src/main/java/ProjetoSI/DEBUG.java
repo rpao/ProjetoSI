@@ -32,12 +32,4 @@ public final class DEBUG {
 			}
 		}		
 	}
-
-	public static void despejarAcoesTeam (List<AcaoTeam> acoes) {
-		if (modoDebugHabilitado){
-			for (AcaoTeam a: acoes){
-				System.out.println("  "+a.toString());				
-			}
-		}		
-	}
 }

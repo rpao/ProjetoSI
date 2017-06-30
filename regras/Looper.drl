@@ -1,5 +1,4 @@
 package ProjetoSI;
-
 import ProjetoSI.*;
 import robocode.*;
 import robocode.ScannedRobotEvent;
@@ -13,21 +12,39 @@ end
 rule "DEPURAR ACOES"
 	when
 		$acao: Acao($tipo: tipo, $prioridade1: prioridade)
-		$acao2: Acao(tipo==$tipo, $prioridade2: prioridade)
-		eval ($prioridade1 > $prioridade2)
+		$acao2: Acao(tipo == $tipo, $prioridade2: prioridade)
+		eval($prioridade1 > $prioridade2)
 	then
 		retract($acao2);
-		System.out.println("> Depurar acoes por prioridade");
+		System.out.println("> Depurar acoes por prioridade...");
 end
 
-// Gira o radar quando não há envento escaneado ou alvo selecionado
+// Gira o radar quando não há alvo selecionado
 rule "GIRAR RADAR"
 	when
-		$status : EstadoRobot()
 		not (exists ScannedRobotEvent())
 	then
-		insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 5));
-		System.out.println("> Girar radar");
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 1));
+		System.out.println("> Girar radar...");
+end
+
+// Se movimentar
+rule "MOVIMENTAR"
+	when
+		$status : EstadoRobot()		
+	then
+		insert(new Acao(Acao.MOVIMENTO_CIRCULO, 500, 1));	
+		System.out.println("> Movimentar em circulo...");
+end
+
+// Choque com muro ou com integrante do time: avançar
+rule "CHOQUE"
+	when
+		$status : EstadoRobot($anguloRelativo: heading)		
+		HitWallEvent()|| (HitRobotEvent($nome: name) && not (eval (Util.NotFromTeam($nome))))
+	then
+		insert(new Acao(Acao.AVANCAR, 500, 5));
+		System.out.println ("> Choque > Mudar trajetória...");
 end
 
 // Dispara contra o alvo na mira
@@ -41,34 +58,8 @@ rule "DISPARAR"
 		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
 		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
 		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
-		System.out.println("> Mirar...");
-		
 		insert(new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
-		System.out.println("> Disparar Contra "+$nomeAlvo);
-end
-
-// Se movimentar em caso de choque
-rule "MOVIMENTAR"
-	when
-		$status : EstadoRobot()
-		not (exists HitWallEvent())
-		not (exists HitRobotEvent())
-		HitByBulletEvent()
-	then
-		insert(new Acao(Acao.GIRAR_TANQUE_DIR, (360*Math.random() - 180),  5));
-		insert(new Acao(Acao.RETROCEDER, 500, 1));
-		System.out.println ("> Movimentar...");
-end
-
-// Choque com muro, girar o tanque em 90 graus
-rule "CHOQUE"
-	when
-		$status : EstadoRobot()
-		HitWallEvent() || (HitRobotEvent($nome: name) && not (eval (Util.NotFromTeam($nome))))		
-		not (exists HitByBulletEvent())
-	then
-		insert(new Acao(Acao.AVANCAR, 10, 1));
-		System.out.println ("> Choque > Mudar trajetória...");
+		System.out.println("> Mirar...\n> Disparar Contra "+$nomeAlvo);
 end
 
 // Quando ocorre um choque com outro robô que não é do time: mira e atira
@@ -83,6 +74,6 @@ rule "CHOQUE COM ROBOT INIMIGO > MIRAR > ATIRAR"
 		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
 		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($anguloRelativo - anguloRelativoRadar), 1));		
 		insert(new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
-		insert(new Acao(Acao.AVANCAR, 100, 1));
-		System.out.println("> Choque com "+$nome+" > mirar > disparar...");
+		insert(new Acao(Acao.AVANCAR, 100, 5));
+		System.out.println("> Choque com "+$nome+" > mirar > disparar...\n> Afastar...");
 end
