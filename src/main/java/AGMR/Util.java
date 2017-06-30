@@ -1,4 +1,4 @@
-package ProjetoSI;
+package AGMR;
 
 import robocode.MessageEvent;
 import robocode.RobotDeathEvent;
@@ -7,14 +7,14 @@ import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 public class Util {
 	public static boolean NotFromTeam(String name) {
-		if (name.contains("ProjetoSI") == true)
+		if (name.contains("AGMR") == true)
 			return false;
 
 		return true;
 	}
 
 	public static boolean isLeader(RobotDeathEvent r){
-		if (r.getName().contains("ProjetoSI.Lider"))
+		if (r.getName().contains("AGMR.Lider"))
 			return true;
 
 		return false;

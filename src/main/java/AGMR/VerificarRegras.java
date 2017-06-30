@@ -1,4 +1,4 @@
-package ProjetoSI;
+package AGMR;
 
 import java.util.List;
 import java.util.Vector;

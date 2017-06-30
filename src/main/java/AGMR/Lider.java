@@ -1,4 +1,4 @@
-package ProjetoSI;
+package AGMR;
 
 import java.awt.Color;
 import java.util.Vector;
@@ -25,7 +25,7 @@ import robocode.ScannedRobotEvent;
 import robocode.TeamRobot;
 
 public class Lider extends TeamRobot{
-	public static String REGRAS = "ProjetoSI/regras/Lider.drl";
+	public static String REGRAS = "AGMR/regras/Lider.drl";
 	public static String CONSULTA_ACOES = "consulta_acoes";
 
 	private KnowledgeBuilder kbuilder;

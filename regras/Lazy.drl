@@ -1,6 +1,6 @@
-package ProjetoSI;
+package AGMR;
 
-import ProjetoSI.*;
+import AGMR.*;
 import robocode.*;
 import robocode.ScannedRobotEvent;
 

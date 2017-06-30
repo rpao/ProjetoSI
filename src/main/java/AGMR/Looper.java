@@ -1,16 +1,6 @@
-package ProjetoSI;
+package AGMR;
 
-import robocode.AdvancedRobot;
-import robocode.BulletHitBulletEvent;
-import robocode.BulletHitEvent;
-import robocode.BulletMissedEvent;
-import robocode.HitByBulletEvent;
-import robocode.HitRobotEvent;
-import robocode.HitWallEvent;
-import robocode.RobotDeathEvent;
-import robocode.ScannedRobotEvent;
-
-import java.awt.*;
+import java.awt.Color;
 import java.util.Vector;
 
 import org.drools.KnowledgeBase;
@@ -23,8 +13,19 @@ import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.FactHandle;
 import org.drools.runtime.rule.QueryResultsRow;
 
-public class Lazy extends AdvancedRobot {
-	public static String REGRAS = "ProjetoSI/regras/Lazy.drl";
+import robocode.AdvancedRobot;
+import robocode.BulletHitBulletEvent;
+import robocode.BulletHitEvent;
+import robocode.BulletMissedEvent;
+import robocode.HitByBulletEvent;
+import robocode.HitRobotEvent;
+import robocode.HitWallEvent;
+import robocode.RobotDeathEvent;
+import robocode.ScannedRobotEvent;
+
+public class Looper extends AdvancedRobot {
+
+	public static String REGRAS = "AGMR/regras/Looper.drl";
 	public static String CONSULTA_ACOES = "consulta_acoes";
 
 	private KnowledgeBuilder kbuilder;
@@ -32,11 +33,13 @@ public class Lazy extends AdvancedRobot {
 	private StatefulKnowledgeSession ksession;
 	private Vector<FactHandle> refFatosAtuais = new Vector<FactHandle>();
 
-	public Lazy(){}
+
+	public Looper(){
+	}
 
 	@Override
-	public void run() {		
-		// Set colors
+	public void run() {
+
 		setBodyColor(Color.BLACK);
 		setGunColor(Color.BLACK);
 		setRadarColor(Color.BLACK);
@@ -52,7 +55,7 @@ public class Lazy extends AdvancedRobot {
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
 
-		while (true) {	
+		while (true) {
 			DEBUG.mensagem("inicio turno");
 			carregarEstadoRobot();
 			carregarEstadoBatalha();
@@ -76,13 +79,13 @@ public class Lazy extends AdvancedRobot {
 	}
 
 	private void criarBC() {
-		String ficheroRegras = System.getProperty("robot.regras", Lazy.REGRAS);
+		String ficheroRegras = System.getProperty("robot.regras", Looper.REGRAS);
 
 		DEBUG.mensagem("criar BC");
 		kbuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
 
 		DEBUG.mensagem("Carregar regras a partir de: "+ficheroRegras);
-		kbuilder.add(ResourceFactory.newClassPathResource(ficheroRegras, Lazy.class), ResourceType.DRL);
+		kbuilder.add(ResourceFactory.newClassPathResource(ficheroRegras, Looper.class), ResourceType.DRL);
 		if (kbuilder.hasErrors()) {
 			System.err.println(kbuilder.getErrors().toString());
 		}
@@ -119,7 +122,7 @@ public class Lazy extends AdvancedRobot {
 		Acao Acao;
 		Vector<Acao> listaAcaoes = new Vector<Acao>();
 
-		for (QueryResultsRow resultado : ksession.getQueryResults(Lazy.CONSULTA_ACOES)) {
+		for (QueryResultsRow resultado : ksession.getQueryResults(Looper.CONSULTA_ACOES)) {
 			Acao = (Acao) resultado.get("acao");
 			Acao.setRobot(this);
 			listaAcaoes.add(Acao);

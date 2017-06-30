@@ -1,4 +1,4 @@
-package ProjetoSI;
+package AGMR;
 
 public class Coordenada implements java.io.Serializable{
 	double X;

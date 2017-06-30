@@ -1,4 +1,4 @@
-package ProjetoSI;
+package AGMR;
 
 import java.awt.Color;
 import java.util.Vector;
@@ -13,33 +13,33 @@ import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.FactHandle;
 import org.drools.runtime.rule.QueryResultsRow;
 
-import robocode.AdvancedRobot;
 import robocode.BulletHitBulletEvent;
 import robocode.BulletHitEvent;
 import robocode.BulletMissedEvent;
+import robocode.Droid;
 import robocode.HitByBulletEvent;
 import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
+import robocode.MessageEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
+import robocode.TeamRobot;
 
-public class Looper extends AdvancedRobot {
-
-	public static String REGRAS = "ProjetoSI/regras/Looper.drl";
+public class Droids extends TeamRobot implements Droid{
+	public static String REGRAS = "AGMR/regras/Droids.drl";
 	public static String CONSULTA_ACOES = "consulta_acoes";
 
 	private KnowledgeBuilder kbuilder;
 	private KnowledgeBase kbase;
 	private StatefulKnowledgeSession ksession;
-	private Vector<FactHandle> refFatosAtuais = new Vector<FactHandle>();
+	private Vector<FactHandle> refAcoesAtuais = new Vector<FactHandle>();
 
-
-	public Looper(){
+	public Droids(){
 	}
 
 	@Override
 	public void run() {
-
+		// Set colors
 		setBodyColor(Color.BLACK);
 		setGunColor(Color.BLACK);
 		setRadarColor(Color.BLACK);
@@ -47,45 +47,42 @@ public class Looper extends AdvancedRobot {
 
 		DEBUG.habilitarModoDebug(System.getProperty("robot.debug", "true").equals("true"));    	
 
-		// Criar base de conhecimentos e carregar regras
 		criarBC();
 
-		// Tornar os movimentos independentes (tanque, cano e radar)
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
 
-		while (true) {
-			DEBUG.mensagem("inicio turno");
-			carregarEstadoRobot();
-			carregarEstadoBatalha();
 
-			// Lançar regras
-			DEBUG.mensagem("Acoes na memoria");
+		while (true) {
+			DEBUG.mensagem("inicio do turno");
+			cargarEstadoRobot();
+			cargarEstadoBatalha();
+
+			DEBUG.mensagem("acoes em memoria ativa");
 			DEBUG.despejarAcoes(ksession);           
 			ksession.fireAllRules();
-			limparFatosAntigos();
+			limparAcoesAntigas();
 
-			// Recuperar Acoes
 			Vector<Acao> acoes = recuperarAcoes();
 			DEBUG.mensagem("acoes resultantes");
 			DEBUG.despejarAcoes(acoes);
 
-			// Executar Acoes
 			executarAcoes(acoes);
-			DEBUG.mensagem("fim turno\n");
-			execute();  // Informa fim do turno
+			DEBUG.mensagem("fim do turno\n");
+			execute();
 		}
+
 	}
 
 	private void criarBC() {
-		String ficheroRegras = System.getProperty("robot.regras", Looper.REGRAS);
+		String ficheroRegras = System.getProperty("robot.regras", Droids.REGRAS);
 
 		DEBUG.mensagem("criar BC");
 		kbuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
 
-		DEBUG.mensagem("Carregar regras a partir de: "+ficheroRegras);
-		kbuilder.add(ResourceFactory.newClassPathResource(ficheroRegras, Looper.class), ResourceType.DRL);
+		DEBUG.mensagem("carregar regras a partir de: "+ficheroRegras);
+		kbuilder.add(ResourceFactory.newClassPathResource(ficheroRegras, Droids.class), ResourceType.DRL);
 		if (kbuilder.hasErrors()) {
 			System.err.println(kbuilder.getErrors().toString());
 		}
@@ -93,88 +90,93 @@ public class Looper extends AdvancedRobot {
 		kbase = KnowledgeBaseFactory.newKnowledgeBase();
 		kbase.addKnowledgePackages(kbuilder.getKnowledgePackages());
 
-		DEBUG.mensagem("Criar secao em memoria ativa");
+		DEBUG.mensagem("criar secao de memoria ativa");
 		ksession = kbase.newStatefulKnowledgeSession();
 	}
 
-	private void carregarEstadoRobot() {
+	private void cargarEstadoRobot() {
 		EstadoRobot estadoRobot = new EstadoRobot(this);
-		refFatosAtuais.add(ksession.insert(estadoRobot));
+		refAcoesAtuais.add(ksession.insert(estadoRobot));
 	}
 
-	private void carregarEstadoBatalha() {
+	private void cargarEstadoBatalha() {
 		EstadoBatalha estadoBatalha =
 				new EstadoBatalha(getBattleFieldWidth(), getBattleFieldHeight(),
 						getNumRounds(), getRoundNum(),
 						getTime(),
 						getOthers());
-		refFatosAtuais.add(ksession.insert(estadoBatalha));
+		refAcoesAtuais.add(ksession.insert(estadoBatalha));
 	}
 
-	private void limparFatosAntigos() {
-		for (FactHandle refFato : this.refFatosAtuais) {
-			ksession.retract(refFato);
+	private void limparAcoesAntigas() {
+		for (FactHandle referenciaAcoes : this.refAcoesAtuais) {
+			ksession.retract(referenciaAcoes);
 		}
-		this.refFatosAtuais.clear();
+		this.refAcoesAtuais.clear();
 	}
 
 	private Vector<Acao> recuperarAcoes() {
-		Acao Acao;
-		Vector<Acao> listaAcaoes = new Vector<Acao>();
+		Acao acao;
+		Vector<Acao> listaAcoes = new Vector<Acao>();
 
-		for (QueryResultsRow resultado : ksession.getQueryResults(Looper.CONSULTA_ACOES)) {
-			Acao = (Acao) resultado.get("acao");
-			Acao.setRobot(this);
-			listaAcaoes.add(Acao);
+		for (QueryResultsRow resultado : ksession.getQueryResults(Droids.CONSULTA_ACOES)) {
+			acao = (Acao) resultado.get("acao");
+			acao.setRobot(this);
+			listaAcoes.add(acao);
 			ksession.retract(resultado.getFactHandle("acao"));
 		}
 
-		return listaAcaoes;
+		return listaAcoes;
 	}
 
-	private void executarAcoes(Vector<Acao> Acoes) {
-		for (Acao Acao : Acoes) {
-			Acao.iniciarExecucao();
+	private void executarAcoes(Vector<Acao> acoes) {
+		for (Acao acao : acoes) {
+			acao.iniciarExecucao();
 		}
 	}
 
 	@Override
 	public void onBulletHit(BulletHitEvent event) {
-		refFatosAtuais.add(ksession.insert(event));
+		refAcoesAtuais.add(ksession.insert(event));
 	}
 
 	@Override
 	public void onBulletHitBullet(BulletHitBulletEvent event) {
-		refFatosAtuais.add(ksession.insert(event));
+		refAcoesAtuais.add(ksession.insert(event));
 	}
 
 	@Override
 	public void onBulletMissed(BulletMissedEvent event) {
-		refFatosAtuais.add(ksession.insert(event));
+		refAcoesAtuais.add(ksession.insert(event));
 	}
 
 	@Override
 	public void onHitByBullet(HitByBulletEvent event) {
-		refFatosAtuais.add(ksession.insert(event));
+		refAcoesAtuais.add(ksession.insert(event));
 	}
 
 	@Override
 	public void onHitRobot(HitRobotEvent event) {
-		refFatosAtuais.add(ksession.insert(event));
+		refAcoesAtuais.add(ksession.insert(event));
 	}
 
 	@Override
 	public void onHitWall(HitWallEvent event) {
-		refFatosAtuais.add(ksession.insert(event));
+		refAcoesAtuais.add(ksession.insert(event));
 	}
 
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
-		refFatosAtuais.add(ksession.insert(event));
+		refAcoesAtuais.add(ksession.insert(event));
 	}
 
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
-		refFatosAtuais.add(ksession.insert(event));
+		refAcoesAtuais.add(ksession.insert(event));
+	}
+
+	@Override
+	public void onMessageReceived(MessageEvent event) {
+		refAcoesAtuais.add(ksession.insert(event));
 	}
 }

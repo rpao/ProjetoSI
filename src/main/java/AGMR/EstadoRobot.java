@@ -1,4 +1,4 @@
-package ProjetoSI;
+package AGMR;
 
 import robocode.AdvancedRobot;
 import robocode.TeamRobot;
