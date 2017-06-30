@@ -6,14 +6,14 @@ import robocode.ScannedRobotEvent;
 
 // Consultar ações na lista de ações
 query "consulta_acoes"
-	acao: AcaoTeam()
+	acao: Acao()
 end
 
 // Depurar ações por prioridade
 rule "Mais de uma ação ao mesmo tempo --> Escolhe a de maior prioridades"
 	when
-		$acao1: AcaoTeam($tipo: tipo, $prioridade1: prioridade)
-		$acao2: AcaoTeam(tipo==$tipo, $prioridade2: prioridade)
+		$acao1: Acao($tipo: tipo, $prioridade1: prioridade)
+		$acao2: Acao(tipo==$tipo, $prioridade2: prioridade)
 		eval ($prioridade1 > $prioridade2)
 	then
 		retract($acao2);     // Elimina la acao menos prioritaria 
@@ -26,7 +26,7 @@ rule "Se não existem robos próximos --> Girar o radar"
 		not (exists ScannedRobotEvent())
 		$batalha: EstadoBatalha()
 	then
-		insert (new AcaoTeam(AcaoTeam.GIRAR_RADAR_DIR, 360, 3));
+		insert (new Acao(Acao.GIRAR_RADAR_DIR, 360, 3));
 		$batalha.cleanRoboEscaneado();
 		System.out.println("Girar Radar");
 end
@@ -42,7 +42,7 @@ rule "Inimigo Novo Escaneado --> Adiciona robo a lista de robos"
 		$batalha.addRoboEscaneado($roboEscaneado);
 		System.out.println("Inimigo Novo Escaneado");
 		
-		insert(new AcaoTeam(AcaoTeam.SEND_MESSAGE, Util.gerarCoordenada($status, $roboEscaneado), 6));
+		insert(new Acao(Acao.SEND_MESSAGE, Util.gerarCoordenada($status, $roboEscaneado), 6));
 		System.out.println("Enviando mensagem: " + $roboEscaneado);
 end
 
@@ -51,8 +51,8 @@ rule "Bateu em outro robo --> Retrocede 200 pixels"
 	when
 		HitRobotEvent($nome: name, $anguloRelativo: bearing)
 	then
-		insert(new AcaoTeam(AcaoTeam.GIRAR_TANQUE_DIR, (- $anguloRelativo), 6));
-		insert(new AcaoTeam(AcaoTeam.RETROCEDER, 200, 5));
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, (- $anguloRelativo), 6));
+		insert(new Acao(Acao.RETROCEDER, 200, 5));
 		System.out.println("Choque Com outro Robo");
 end
 
@@ -61,8 +61,8 @@ rule "Bateu no muro --> Retrocede 200 pixels"
 	when
 		HitWallEvent($anguloRelativo: bearing)
 	then
-		insert(new AcaoTeam(AcaoTeam.GIRAR_TANQUE_DIR, (- $anguloRelativo), 6));
-		insert(new AcaoTeam(AcaoTeam.AVANCAR, 200, 5));
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, (- $anguloRelativo), 6));
+		insert(new Acao(Acao.AVANCAR, 200, 5));
 		System.out.println("Choque Com Muro");
 	end
 
@@ -76,7 +76,7 @@ rule "[Stop And Go Movement] Se está parado e inimigo atirou --> Avançar"
 		eval($batalha.getRoboInimigo($roboEscaneado).getEnergy() > $roboEscaneado.getEnergy());
 	then
 		double avance = Util.movementStopAndGo($batalha.getRoboInimigo($roboEscaneado).getEnergy() - $roboEscaneado.getEnergy());
-		insert(new AcaoTeam(AcaoTeam.AVANCAR, avance, 4));
+		insert(new Acao(Acao.AVANCAR, avance, 4));
 		System.out.println("STOP AND GO");
 end
 
@@ -88,11 +88,11 @@ rule "Parado --> Movimento Aleatório"
 		not (exists(HitRobotEvent()))
 		not (exists(HitWallEvent()))
 	then
-		insert(new AcaoTeam(AcaoTeam.GIRAR_RADAR_DIR, 360, 2));
-		insert(new AcaoTeam(AcaoTeam.GIRAR_TANQUE_DIR, (360*Math.random() - 180), 2));
-		insert(new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, (360*Math.random() - 180), 2));
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, 360, 2));
+		insert(new Acao(Acao.GIRAR_TANQUE_DIR, (360*Math.random() - 180), 2));
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, (360*Math.random() - 180), 2));
 		double avance = Math.min($batalha.getLarguraCampo(), $batalha.getAlturaCampo())*Math.random();
-		insert(new AcaoTeam(AcaoTeam.AVANCAR, avance, 2));
+		insert(new Acao(Acao.AVANCAR, avance, 2));
 		System.out.println("Movimento Aleatorio");
 end
 
@@ -104,10 +104,10 @@ rule "DISPARAR"
 		eval (Util.NotFromTeam($nomeAlvo))
    then	
 		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
-		insert(new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
 		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
-		insert(new AcaoTeam(AcaoTeam.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
-		insert (new AcaoTeam(AcaoTeam.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
+		insert (new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
 		System.out.println("Mirar e Disparar Contra "+$nomeAlvo);
 end
 
@@ -119,9 +119,9 @@ rule "DISPARAR com inimigo unico"
 		eval (Util.NotFromTeam($nomeAlvo))
    then	
 		double anguloRelativoCano = Util.anguloRelativo($status.getHeading(), $status.getGunHeading());
-		insert(new AcaoTeam(AcaoTeam.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
+		insert(new Acao(Acao.GIRAR_CANHAO_DIR, ($alvoEscaneado.getBearing() - anguloRelativoCano), 5));
 		double anguloRelativoRadar =  Util.anguloRelativo($status.getHeading(), $status.getRadarHeading());
-		insert(new AcaoTeam(AcaoTeam.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
-		insert(new AcaoTeam(AcaoTeam.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
+		insert(new Acao(Acao.GIRAR_RADAR_DIR, ($alvoEscaneado.getBearing() - anguloRelativoRadar), 5));	
+		insert(new Acao(Acao.DISPARAR, Math.min(Rules.MAX_BULLET_POWER, 0.10*$status.getEnergy()), 5));
 		System.out.println("> Mirar e Disparar Contra "+$nomeAlvo);
 end

@@ -64,11 +64,11 @@ public class Droids extends TeamRobot implements Droid{
 			ksession.fireAllRules();
 			limparAcoesAntigas();
 
-			Vector<AcaoTeam> acoes = recuperarAcoesTeam();
+			Vector<Acao> acoes = recuperarAcoes();
 			DEBUG.mensagem("acoes resultantes");
-			DEBUG.despejarAcoesTeam(acoes);
+			DEBUG.despejarAcoes(acoes);
 
-			executarAcoesTeam(acoes);
+			executarAcoes(acoes);
 			DEBUG.mensagem("fim do turno\n");
 			execute();
 		}
@@ -115,12 +115,12 @@ public class Droids extends TeamRobot implements Droid{
 		this.refAcoesAtuais.clear();
 	}
 
-	private Vector<AcaoTeam> recuperarAcoesTeam() {
-		AcaoTeam acao;
-		Vector<AcaoTeam> listaAcoes = new Vector<AcaoTeam>();
+	private Vector<Acao> recuperarAcoes() {
+		Acao acao;
+		Vector<Acao> listaAcoes = new Vector<Acao>();
 
 		for (QueryResultsRow resultado : ksession.getQueryResults(Droids.CONSULTA_ACOES)) {
-			acao = (AcaoTeam) resultado.get("acao");
+			acao = (Acao) resultado.get("acao");
 			acao.setRobot(this);
 			listaAcoes.add(acao);
 			ksession.retract(resultado.getFactHandle("acao"));
@@ -129,8 +129,8 @@ public class Droids extends TeamRobot implements Droid{
 		return listaAcoes;
 	}
 
-	private void executarAcoesTeam(Vector<AcaoTeam> acoes) {
-		for (AcaoTeam acao : acoes) {
+	private void executarAcoes(Vector<Acao> acoes) {
+		for (Acao acao : acoes) {
 			acao.iniciarExecucao();
 		}
 	}

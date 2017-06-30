@@ -1,0 +1,74 @@
+package ProjetoSI
+
+import ProjetoSI.*;
+import robocode.*;
+import robocode.ScannedRobotEvent;
+
+declare
+	lado: boolean
+end
+
+declare
+	array: String[ ]
+end
+
+declare
+	previousEnergy: double
+end
+
+declare
+	movimentDirection: int
+end
+
+declare
+	gunDirection: int
+end
+
+declare
+	wallMargin: int
+end
+
+declare
+	robs: ArrayList
+end
+
+declare
+	nextPredictionX: double
+end
+
+declare
+	nextPredictionY: double
+end
+
+rule "robo detectado -> atirar"
+	when
+		(exists onScannedRobot())
+		$inimigoEscaneado: ScannedRobotEvent()
+		contains(“tryEasy” : inimigoEscaneado)
+		($lado)
+	then
+		ahead(dist)
+		fire(bulletPower)
+end
+
+rule "bala acertada -> fugir"
+	when
+		(exists onHitByBullet())
+	then
+		$movimentDirection = -movimentDirection
+	setahead(200/29)*$(-movimentDirection)
+end
+
+rule "acerta parede -> sair de perto"
+	when
+		(exists onHitWall ())
+	then
+		$movimentDirection = -movimentDirection
+end
+
+rule "robo morto -> tirar da lista"
+	when
+		(exists onRobotDeath ())
+	then
+		$robs.remove(name)
+end

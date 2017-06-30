@@ -63,9 +63,9 @@ public class Lider extends TeamRobot{
 			ksession.fireAllRules();
 			limparAcoesAntigas();
 
-			Vector<AcaoTeam> acoes = recuperarAcoesTeam();
+			Vector<Acao> acoes = recuperarAcoesTeam();
 			DEBUG.mensagem("acoes resultantes");
-			DEBUG.despejarAcoesTeam(acoes);
+			DEBUG.despejarAcoes(acoes);
 
 			executarAcoesTeam(acoes);
 			DEBUG.mensagem("fim do turno\n");
@@ -116,12 +116,12 @@ public class Lider extends TeamRobot{
 		this.refAcoesAtuais.clear();
 	}
 
-	private Vector<AcaoTeam> recuperarAcoesTeam() {
-		AcaoTeam acao;
-		Vector<AcaoTeam> listaAcoes = new Vector<AcaoTeam>();
+	private Vector<Acao> recuperarAcoesTeam() {
+		Acao acao;
+		Vector<Acao> listaAcoes = new Vector<Acao>();
 
 		for (QueryResultsRow resultado : ksession.getQueryResults(Lider.CONSULTA_ACOES)) {
-			acao = (AcaoTeam) resultado.get("acao");
+			acao = (Acao) resultado.get("acao");
 			acao.setRobot(this);
 			listaAcoes.add(acao);
 			ksession.retract(resultado.getFactHandle("acao"));
@@ -130,8 +130,8 @@ public class Lider extends TeamRobot{
 		return listaAcoes;
 	}
 
-	private void executarAcoesTeam(Vector<AcaoTeam> acoes) {
-		for (AcaoTeam acao : acoes) {
+	private void executarAcoesTeam(Vector<Acao> acoes) {
+		for (Acao acao : acoes) {
 			acao.iniciarExecucao();
 		}
 	}

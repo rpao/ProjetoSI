@@ -37,14 +37,14 @@ rule "MOVIMENTAR"
 		System.out.println("> Movimentar em circulo...");
 end
 
-// Choque com muro: avançar
-rule "CHOQUE COM MURO"
+// Choque com muro ou com integrante do time: avançar
+rule "CHOQUE"
 	when
 		$status : EstadoRobot($anguloRelativo: heading)		
-		HitWallEvent()
+		HitWallEvent()|| (HitRobotEvent($nome: name) && not (eval (Util.NotFromTeam($nome))))
 	then
 		insert(new Acao(Acao.AVANCAR, 500, 5));
-		System.out.println("> Choque com muro...");
+		System.out.println ("> Choque > Mudar trajetória...");
 end
 
 // Dispara contra o alvo na mira
@@ -63,7 +63,7 @@ rule "DISPARAR"
 end
 
 // Quando ocorre um choque com outro robô que não é do time: mira e atira
-rule "CHOQUE COM ROBOT > MIRAR > ATIRAR"
+rule "CHOQUE COM ROBOT INIMIGO > MIRAR > ATIRAR"
 	when
 		$status : EstadoRobot()
 		HitRobotEvent($nome: name, $anguloRelativo: bearing)
